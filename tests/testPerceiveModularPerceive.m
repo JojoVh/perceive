@@ -32,13 +32,13 @@ function testPerceiveModularPerceive(testCase, testFile)
                 % Compare file names
                 names1 = sort({files1.name});
                 names2 = sort({files2.name});
-                testCase.verifyEqual(names1', names2', 'File names differ');
+                testCase.verifyEqual(names1', names2', 'File names differ with Actual=perceive and Expected=Modular');
 
                 % Compare file contents
                 for k = 1:numel(names1)
                     f1 = fullfile(folder1, names1{k});
                     f2 = fullfile(folder2, names2{k});
                     testCase.verifyTrue(isequal(fileread(f1), fileread(f2)), ...
-                        sprintf('File content mismatch: %s', names1{k}));
+                        sprintf('File content mismatch with Actual=perceive and Expected=Modular: %s', names1{k}));
                 end
 end
