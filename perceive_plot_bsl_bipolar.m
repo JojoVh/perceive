@@ -40,6 +40,7 @@ xlabel('Time')
 xlim([d.realtime(1) d.realtime(end)])
 
 % title for entire figure
+d.fname=strrep(d.fname, 'BSL','BrainSenseBip');
 sgtitle(strrep(d.fname, '_', '-'))
 
 perceive_print(fullfile(d.hdr.fpath,[strrep(d.fname, 'BSL','BrainSenseBip')]))
