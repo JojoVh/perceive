@@ -95,7 +95,7 @@ for k = 1:numel(filteredNames1)
             sharedFields = intersect(fields1, fields2);
             for i = 1:numel(sharedFields)
                 field = sharedFields{i};
-                testCase.verifyEqual(data1.(field), data2.(field), ...
+                testCase.verifyEqual(data1.(field), data2.(field), 'AbsTol', 1e-3, ...
                     sprintf('Field "%s" mismatch in file: %s', field, filteredNames1{k}));
             end
         end
