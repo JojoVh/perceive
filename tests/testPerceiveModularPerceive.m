@@ -25,10 +25,6 @@ perceiveModular(testFile);  % Perceive post-hackathon
 files1 = dir(fullfile(folder1, '**', '*'));
 files2 = dir(fullfile(folder2, '**', '*'));
 
-% Compare folder contents
-files1 = dir(fullfile(folder1, '**', '*'));
-files2 = dir(fullfile(folder2, '**', '*'));
-
 % Filter out directories
 files1 = files1(~[files1.isdir]);
 files2 = files2(~[files2.isdir]);
@@ -109,7 +105,7 @@ function s = removeIgnoredFields(s, pathsToIgnore)
 for i = 1:numel(pathsToIgnore)
     parts = strsplit(pathsToIgnore(i), '.');
     if isfield(s, parts{1})
-        if numel(parts) == 1
+        if isscalar(parts)
             s = rmfield(s, parts{1});
         else
             sub = s.(parts{1});
