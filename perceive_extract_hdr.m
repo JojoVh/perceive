@@ -78,7 +78,8 @@ end
 % session handling
 % ----------------------------
 if isempty(config.session)
-    hdr.session = ['ses-' datestr(hdr.SessionDate, 'yyyymmddHHMMss')];
+    hdr.session = ['ses-' char(datetime(hdr.SessionEndDate,'format','yyyyMMddhhmmss'))];
+
 else
     % compute follow-up time if needed
     if isfield(config.localsettings, 'followup')

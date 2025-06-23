@@ -151,7 +151,7 @@ for a = 1:length(files)
     end
 
     hdr.SessionEndDate = datetime(strrep(js.SessionEndDate(1:end-1),'T',' ')); %To Do
-    hdr.SessionEndDate = datetime(strrep(js.SessionDate(1:end-1),'T',' ')); %To Do
+    hdr.SessionDate = datetime(strrep(js.SessionDate(1:end-1),'T',' ')); %To Do
     if ~isempty(js.PatientInformation.Final.Diagnosis)
         hdr.Diagnosis = strsplit(js.PatientInformation.Final.Diagnosis,'.');hdr.Diagnosis=hdr.Diagnosis{2};
     else
@@ -180,7 +180,7 @@ for a = 1:length(files)
 
     % determine session
     if isempty(sesMedOffOn01)
-        ses = ['ses-' char(datetime(hdr.SessionDate,'format','yyyyMMddhhmmss'))];
+        ses = ['ses-' char(datetime(hdr.SessionEndDate,'format','yyyyMMddhhmmss'))];
         hdr.session = ses;
     else
         %% preset session
