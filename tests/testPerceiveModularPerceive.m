@@ -63,10 +63,13 @@ for k = 1:numel(filteredNames1)
     if strcmpi(ext, '.mat')
         try
             % Fields to ignore during comparison
-            ignoredSubfields = ['hdr.Dataversion', 'hdr.acq', 'hdr.mode', 'hdr.run', 'hdr.task'];
+            ignoredSubfields = ["hdr.Dataversion", "hdr.acq", "hdr.mode", "hdr.run", "hdr.task"];
 
             data1 = load(filteredPaths1{k});
             data2 = load(filteredPaths2{k});
+            
+            data1=data1.data;
+            data2=data2.data;
 
             % If files differ, launch a subtest to explore struct differences
             testCase.assertTrue(isstruct(data1) && isstruct(data2), 'Non-struct content in files');
