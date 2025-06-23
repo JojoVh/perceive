@@ -129,7 +129,7 @@ for c = 1:length(runs)
     end
     assert(ischar(acq));
 
-    d.fname = strrep(d.fname, 'StimOff', acq);
+    d.fname = perceive_updateAcq(d.fname, acq);
     d.fnamedate = char(datetime(runs{c},'Inputformat','yyyy-MM-dd HH:mm:ss.SSS','format','yyyyMMddhhmmss'));
 
     alldata{end+1} = d;
