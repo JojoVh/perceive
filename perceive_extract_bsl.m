@@ -72,10 +72,11 @@ for c = 1:length(runs)
                 acq_stimcontact = [acq_stimcontact , elstate.Electrode(end-1:end)];
             end
         end
-        if isempty(acq_freq)
-            acq_freq = [num2str(tmp.RateInHertz) 'Hz'];
-            acq_pulse = [num2str(tmp.PulseWidthInMicroSecond) 'us'];
-        end
+        
+        %overwrite left side, take default of right side
+        acq_freq = [num2str(tmp.RateInHertz) 'Hz'];
+        acq_pulse = [num2str(tmp.PulseWidthInMicroSecond) 'us'];
+        
     else
         lfpsettings{2} = 'LFP n/a';
         stimchannels{2} = 'STIM_R_n/a';
