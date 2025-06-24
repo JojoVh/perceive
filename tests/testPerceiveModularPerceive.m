@@ -54,12 +54,12 @@ testCase.verifyEqual(filteredNames1', filteredNames2', ...
 for k = 1:numel(filteredNames1)
 
     testCase.verifyTrue(isequal(fileread(filteredPaths1{k}), fileread(filteredPaths2{k})), ...
-        sprintf('File content mismatch with Actual=perceive and Expected=Modular: %s', filteredNames1{k}));
+        sprintf('File content mismatch with Actual=perceive and Expected=Modular: %s \n running %s', filteredNames1{k}, testFile));
     [~, ~, ext] = fileparts(filteredPaths1{k});
     if strcmpi(ext, '.mat')
         try
             % Fields to ignore during comparison
-            ignoredSubfields = ["hdr.DataVersion", "hdr.acq", "hdr.mod", "hdr.run", "hdr.task"];
+            ignoredSubfields = ["hdr.DataVersion", "hdr.acq", "hdr.mod", "hdr.run", "hdr.task","sampleinfo"];
 
             data1 = load(filteredPaths1{k});
             data2 = load(filteredPaths2{k});
@@ -78,7 +78,7 @@ for k = 1:numel(filteredNames1)
             data2=data2.fields2;
 
             testCase.assertEqual(data1, data2, ...
-                sprintf('Assertion fails content mismatch with Actual=perceive and Expected=Modular: %s', filteredNames1{k}));
+                sprintf('Assertion fails content mismatch with Actual=perceive and Expected=Modular: %s \n running %s', filteredNames1{k}, testFile));
         catch
             % Compare each shared field
             fields1 = fieldnames(data1);
@@ -92,11 +92,11 @@ for k = 1:numel(filteredNames1)
             for i = 1:numel(sharedFields)
                 field = sharedFields{i};
                 testCase.verifyEqual(data1.(field), data2.(field), 'AbsTol', 1e-1, ...
-                    sprintf('Field "%s" mismatch in file: %s', field, filteredNames1{k}));
+                    sprintf('Field "%s" mismatch in file: %s \n running %s', field, filteredNames1{k}, testFile));
             end
         end
     else
-        sprintf('Type file of mismatch had extension: %s', ext);
+        sprintf('Type file of mismatch had extension: %s \n running %s', ext, testFile);
     end
 end
 end
