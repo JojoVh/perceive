@@ -59,7 +59,7 @@ for k = 1:numel(filteredNames1)
     if strcmpi(ext, '.mat')
         try
             % Fields to ignore during comparison
-            ignoredSubfields = ["hdr.DataVersion", "hdr.acq", "hdr.mod", "hdr.run", "hdr.task","sampleinfo", "fnamedate"];
+            ignoredSubfields = ["hdr.DataVersion", "hdr.acq", "hdr.mod", "hdr.run", "hdr.task","sampleinfo", "fnamedate","realtime"];
 
             data1 = load(filteredPaths1{k});
             data2 = load(filteredPaths2{k});
