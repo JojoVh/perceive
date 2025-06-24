@@ -784,7 +784,8 @@ for a = 1:length(files)
                                 elstate = tmp.ElectrodeState{el};
                                 if isfield(elstate, 'ElectrodeAmplitudeInMilliAmps')
                                     if elstate.ElectrodeAmplitudeInMilliAmps > 0.5
-                                    acq_stimcontact = [acq_stimcontact , elstate.Electrode(end-1:end)];
+                                        acq_stimcontact_number = regexp(elstate.Electrode, '.*_(.+)$', 'tokens'); %take the number of the electrode e.g. 4b
+                                        acq_stimcontact = [acq_stimcontact , acq_stimcontact_number{1}{1}];
                                     end
                                 end
                             end
@@ -814,7 +815,8 @@ for a = 1:length(files)
                                 elstate = tmp.ElectrodeState{el};
                                 if isfield(elstate, 'ElectrodeAmplitudeInMilliAmps')
                                     if elstate.ElectrodeAmplitudeInMilliAmps > 0.5
-                                    acq_stimcontact = [acq_stimcontact , elstate.Electrode(end-1:end)];
+                                        acq_stimcontact_number = regexp(elstate.Electrode, '.*_(.+)$', 'tokens'); %take the number of the electrode e.g. 4b
+                                        acq_stimcontact = [acq_stimcontact , acq_stimcontact_number{1}{1}];
                                     end
                                 end
                             end
