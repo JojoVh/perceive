@@ -1,4 +1,4 @@
-function alldata_lmtd = perceive_extract_lfp_montage_time_domain(data, hdr, config, idxDatafield)
+function alldata_lmtd = perceive_extract_lfp_montage_time_domain(data, hdr, config)
 
 % extraction of LfpMontageTimeDomain data into FieldTrip-like format
 %
@@ -12,7 +12,6 @@ function alldata_lmtd = perceive_extract_lfp_montage_time_domain(data, hdr, conf
 %   alldata_lmtd - cell array of structs per run
 
 alldata_lmtd = {};
-datafields = fieldnames(data);
 FirstPacketDateTime = strrep(strrep({data(:).FirstPacketDateTime},'T',' '),'Z','');
 runs = unique(FirstPacketDateTime);
 
@@ -34,7 +33,7 @@ for idxRun = 1:length(runs)
     i = perceive_ci(runs{idxRun}, FirstPacketDateTime);
     d = struct();
     d.hdr = hdr;
-    d.datatype = datafields{idxDatafield};
+    d.datatype = 'LfpMontageTimeDomain';
     d.hdr.IS.Pass = regexprep(strrep(unique(strtok(Pass(i), '_')), {'FIRST','SECOND'}, {'1','2'}), '_', '');
     d.hdr.IS.GlobalSequences = GlobalSequences(i,:);
     d.hdr.IS.GlobalPacketSizes = GlobalPacketSizes(i,:);
