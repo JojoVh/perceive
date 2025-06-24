@@ -1,7 +1,7 @@
 classdef testProcessData < matlab.unittest.TestCase
     properties
         testFiles = arrayfun(@(x) sprintf('Report_Json_Session_Report_MOCK%d.json', x), 1:16, 'UniformOutput', false);
-        expectedFiles = arrayfun(@(x) sprintf('Report_Json_Session_Report_MOCK%d_GroupHistory.mat', x), 2:4, 'UniformOutput', false);
+        expectedFiles = arrayfun(@(x) sprintf('Report_Json_Session_Report_MOCK%d_GroupHistory.mat', x), 1:4, 'UniformOutput', false);
     end
 
     methods (Test)
@@ -13,7 +13,7 @@ classdef testProcessData < matlab.unittest.TestCase
         function testExpectedAgainstCurrent(testCase)
             %parentDir = fileparts(fileparts(mfilename('fullpath'))); % Move one level up
             %addpath(genpath(parentDir)); % Add parent folder and all its subfolders
-            for i = 2:4
+            for i = 1:4
 
                 % Load input file
                 actualData = perceive_GroupHistory(testCase.testFiles{i});

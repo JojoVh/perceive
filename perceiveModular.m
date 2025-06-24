@@ -233,7 +233,7 @@ for idxFile = 1:length(files)
 
                 case 'LfpMontageTimeDomain'
 
-                    alldata_lmtd = perceive_extract_lfp_montage_time_domain(data, hdr, config, idxDatafield);
+                    alldata_lmtd = perceive_extract_lfp_montage_time_domain(data, hdr, config);
                     alldata = [alldata, alldata_lmtd];
 
                 case 'BrainSenseSurvey'
