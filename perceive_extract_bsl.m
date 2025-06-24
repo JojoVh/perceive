@@ -58,7 +58,7 @@ for c = 1:length(runs)
         acq_pulse = [num2str(tmp.PulseWidthInMicroSecond) 'us'];
     else
         lfpsettings{1} = 'LFP n/a';
-        stimchannels{1} = 'STIM_L_n/a';
+        stimchannels{1} = 'STIM n/a';
     end
 
     % RIGHT
@@ -82,7 +82,7 @@ for c = 1:length(runs)
         
     else
         lfpsettings{2} = 'LFP n/a';
-        stimchannels{2} = 'STIM_R_n/a';
+        stimchannels{2} = 'STIM n/a';
     end
 
     d.label = [strcat(lfpchannels','_',lfpsettings)' stimchannels'];
