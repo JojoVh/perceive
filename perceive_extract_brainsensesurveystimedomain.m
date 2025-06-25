@@ -15,7 +15,7 @@ ElectrodeIdentifier=data{2};
 assert(strcmp(ElectrodeSurvey.SurveyMode,'ElectrodeSurvey'))
 assert(strcmp(ElectrodeIdentifier.SurveyMode,'ElectrodeIdentifier'))
 
-if ~isfield(js, 'LfpMontageTimeDomain') %ElectrodeSurvey is the same as LMTD
+if ~isfield(hdr.js, 'LfpMontageTimeDomain') %ElectrodeSurvey is the same as LMTD
     data=ElectrodeSurvey.ElectrodeSurvey;
 
     FirstPacketDateTime = strrep(strrep({data(:).FirstPacketDateTime},'T',' '),'Z','');
@@ -36,7 +36,7 @@ if ~isfield(js, 'LfpMontageTimeDomain') %ElectrodeSurvey is the same as LMTD
             i=perceive_ci(runs{c},FirstPacketDateTime);
             d=[];
             d.hdr = hdr;
-            d.datatype = datafields{idxDatafield};
+            d.datatype = 'BrainSenseSurveysTimeDomain';
             d.fsample = fsample;
             tmp = [data(i).TimeDomainDatainMicroVolts]';
             d.trial{1} = [tmp];
@@ -83,7 +83,7 @@ if length(runs)>1 %assert that data is not empty
         i=perceive_ci(runs{c},FirstPacketDateTime);
         d=[];
         d.hdr = hdr;
-        d.datatype = datafields{idxDatafield};
+        d.datatype = 'BrainSenseSurveysTimeDomain';
         d.fsample = fsample;
         tmp = [data(i).TimeDomainDatainMicroVolts]';
         d.trial{1} = [tmp];
