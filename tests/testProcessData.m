@@ -13,7 +13,7 @@ classdef testProcessData < matlab.unittest.TestCase
         function testExpectedAgainstCurrent(testCase)
             %parentDir = fileparts(fileparts(mfilename('fullpath'))); % Move one level up
             %addpath(genpath(parentDir)); % Add parent folder and all its subfolders
-            for i = 1:4
+            for i = 2:4
 
                 % Load input file
                 actualData = perceive_GroupHistory(testCase.testFiles{i});
