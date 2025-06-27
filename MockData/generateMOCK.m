@@ -24,7 +24,7 @@ function s = updateFieldWithSubkey(s, key, subkey)
             % Check if the current field matches the key and contains the subkey
             if strcmp(fields{i}, key) && isstruct(fieldValue) && isfield(fieldValue, subkey)
                 % Indefinite Streaming: special case where six first
-                % Timestamps should be equal, next six should be equal etc.
+                % Timestamps should be equal, next six should be equal etc. because of 6 contacts
                 if strcmp(key, 'IndefiniteStreaming')
                     for a = 1:length(s.(fields{i}))/6
                         b=(6*(a-1)+1);
@@ -54,12 +54,34 @@ function s = updateFieldWithSubkey(s, key, subkey)
                             s.(fields{i})(a).('TicksInMses') = s.(fields{i})(a-1).('TicksInMses');
                         end
                     end
-                    % for a = 1:length(s.(fields{i}))/2
-                    %     b=(2*(a-1)+1);
-                    %     s.(fields{i})(b+1).(subkey) = (s.(fields{i})(b).(subkey)); % Update subkey value
-                    %     s.(fields{i})(b+1).('TicksInMses') = (s.(fields{i})(b).('TicksInMses')); % Update subkey value
-                    % 
-                    % end
+                    % now check if there is for BrainSenseTimeDomain also BrainSenseLFP
+                    % then try to match BrainSenseLFP data
+                    % first take BrainSenseTimeDomain entry nr1,
+                    % then copy critical fields to BrainSenseLFP entry nr1
+                    % copy it back to BrainSenseTimeDomain entry nr2 if exist
+                    % adapt BrainSenseLFP to 5Hz
+                    % start over with BrainSenseTimeDomain entry 3 if exist
+                    if isfield(s,'BrainSenseLfp')
+                        
+                        for a = 1:length(s.('BrainSenseLfp'))
+                            s.('BrainSenseLfp')(a).('SampleRateInHz')=5;
+                            if isfield(s, 'BrainSenseTimeDomain') && numel(s.('BrainSenseTimeDomain')) >= 2*a-1
+                                s.('BrainSenseLfp')(a).('FirstPacketDateTime')=s.('BrainSenseTimeDomain')(2*a-1).('FirstPacketDateTime');
+                                tmp = s.('BrainSenseLfp')(a).('FirstPacketDateTime');
+                                idx = regexp(tmp, '\d');
+                                tmp(idx(end-3)) = num2str(randi([0 9]));
+                                s.('BrainSenseLfp')(a).('FirstPacketDateTime') = tmp;
+
+                                % ist not everywhere
+                                % s.('BrainSenseLfp')(a).('FirstPacketDateTimeBlockId')=s.('BrainSenseTimeDomain')(2*a-1).('FirstPacketDateTimeBlockId');
+                                % s.('BrainSenseLfp')(a).('FirstPacketDateTimeOffsetInSeconds')=s.('BrainSenseTimeDomain')(2*a-1).('FirstPacketDateTimeOffsetInSeconds');
+
+                            else
+                                warning('there are more BrainSenseLfp entries as 2 * BrainSenseTimeDomain')
+                            end
+
+                        end
+                    end
                 end
             elseif isstruct(fieldValue) % Handle nested structures
                 if numel(fieldValue) > 1 % If it's a struct array
