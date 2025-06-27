@@ -7,3 +7,4 @@ perceive.asv
 sub*/
 tests/Report_Json_Session_Report_MOCK*_GroupHistory.json
 *generate_Mock_call*
+*.xlsx
