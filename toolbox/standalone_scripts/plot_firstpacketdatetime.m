@@ -5,6 +5,7 @@
 
 % Load and parse JSON
 jsonFile = 'Report_Json_Session_Report_MOCK6.json'; % change this to your file path
+
 fid = fopen(jsonFile);
 raw = fread(fid, inf);
 str = char(raw');
