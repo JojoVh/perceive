@@ -188,11 +188,13 @@ for idxFile = 1:length(files)
                             alldata = [alldata, alldata_diag];
 
                             % plot combined LFP trend (L/R stim and LFP)
-                            for idxTrendLog = 1:length(alldata_diag)
-                                if strcmp(alldata_diag{idxTrendLog}.datatype, 'DiagnosticData.LFPTrends') && ...
-                                        isfield(alldata_diag{idxTrendLog}, 'label') && numel(alldata_diag{idxTrendLog}.label) == 4
-                                    perceive_plot_diagnostic_lfptrend(alldata_diag{idxTrendLog});
-                                    break; % plot only once
+                            if config.extended
+                                for idxTrendLog = 1:length(alldata_diag)
+                                    if strcmp(alldata_diag{idxTrendLog}.datatype, 'DiagnosticData.LFPTrends') && ...
+                                            isfield(alldata_diag{idxTrendLog}, 'label') && numel(alldata_diag{idxTrendLog}.label) == 4
+                                        perceive_plot_diagnostic_lfptrend(alldata_diag{idxTrendLog});
+                                        break; % plot only once
+                                    end
                                 end
                             end
                         end
@@ -205,10 +207,12 @@ for idxFile = 1:length(files)
                             % nothing is appended to alldata in current version
                             % maybe for future: append to alldata container
                             % alldata = [alldata, alldata_diag_lfpsnap];
-
+ 
                             % plot every snapshot
-                            for idxSnapshot = 1:length(alldata_diag_lfpsnap)
-                                perceive_plot_diagnostic_lfpsnapshot(alldata_diag_lfpsnap{idxSnapshot});
+                            if config.extended
+                                for idxSnapshot = 1:length(alldata_diag_lfpsnap)
+                                    perceive_plot_diagnostic_lfpsnapshot(alldata_diag_lfpsnap{idxSnapshot});
+                                end
                             end
 
                         end
@@ -903,7 +907,8 @@ for idxFile = 1:length(files)
                     data.fname = MetaT.perceiveFilename{i};
                     save(fullfile(hdr.fpath,MetaTOld.perceiveFilename{i}), 'data')
                     movefile(fullfile(hdr.fpath,MetaTOld.perceiveFilename{i}), fullfile(hdr.fpath,MetaT.perceiveFilename{i}));
-                    warning('updating filename part')
+                    warning('updating filename part\nOld filename: %s\nNew filename: %s', ...
+                        MetaTOld.perceiveFilename{i}, MetaT.perceiveFilename{i});
                 end
             end
         end
