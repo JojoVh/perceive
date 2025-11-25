@@ -116,7 +116,9 @@ run           = config.run;
 %% set local settings
 localsettings=perceive_localsettings(localsettings);
 datafields=localsettings.datafields;
-
+%% set global settings
+set(0,'DefaultFigureWindowStyle','normal') %prevents that figures are "docked" or "modal" as in live scripts
+ 
 %% iterate over files
 for idxFile = 1:length(files)
     filename = files{idxFile};
@@ -857,6 +859,7 @@ for idxFile = 1:length(files)
         MetaTOld = MetaT;
 
         if gui
+            disp('OPENING GUI \nnow confirm or adapt file naming through the GUI')
             app=perceive_gui(MetaT);
             waitfor(app.saveandcontinueButton,'UserData')
             MetaT=app.MetaT;
