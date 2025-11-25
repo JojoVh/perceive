@@ -859,7 +859,7 @@ for idxFile = 1:length(files)
         MetaTOld = MetaT;
 
         if gui
-            disp("OPENING GUI \nnow confirm or adapt file naming through the GUI")
+            disp(['OPENING GUI' newline 'now confirm or adapt file naming through the GUI'])
             app=perceive_gui(MetaT);
             waitfor(app.saveandcontinueButton,'UserData')
             MetaT=app.MetaT;
