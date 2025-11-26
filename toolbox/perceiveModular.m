@@ -118,7 +118,8 @@ localsettings=perceive_localsettings(localsettings);
 datafields=localsettings.datafields;
 %% set global settings
 set(0,'DefaultFigureWindowStyle','normal') %prevents that figures are "docked" or "modal" as in live scripts
- 
+app.saveandexitButton.UserData = true; %prevents that the previous perceive GUI freezes
+
 %% iterate over files
 for idxFile = 1:length(files)
     filename = files{idxFile};
@@ -861,7 +862,9 @@ for idxFile = 1:length(files)
         if gui
             disp(['OPENING GUI' newline 'now confirm or adapt file naming through the GUI'])
             app=perceive_gui(MetaT);
-            waitfor(app.saveandcontinueButton,'UserData')
+            waitfor(app.saveandexitButton,'UserData')
+            % Reset UserData so next run won't hang
+            app.saveandexitButton.UserData = [];
             MetaT=app.MetaT;
             app.delete;
         else
