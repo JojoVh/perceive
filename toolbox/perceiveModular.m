@@ -861,13 +861,41 @@ for idxFile = 1:length(files)
 
         if gui
             disp(['OPENING GUI' newline 'now confirm or adapt file naming through the GUI'])
-            app=perceive_gui(MetaT);
-            waitfor(app.saveandexitButton,'UserData')
+
+            % Launch the App Designer GUI
+            app = perceive_gui(MetaT);
+
+            % Ensure orderly shutdown if the user closes the window
+            app.UIFigure.CloseRequestFcn = @(src,event) ...
+                set(app.saveandexitButton,'UserData','closed');
+
+            try
+                % Block until Save & Exit button or CloseRequestFcn changes UserData
+                waitfor(app.saveandexitButton,'UserData');
+
+                % Retrieve updated MetaT from the app
+                MetaT = app.MetaT;
+
+            catch ME
+                % Handle unexpected errors or closure
+                disp('App closed or an error occurred.');
+                if isvalid(app)
+                    delete(app);
+                end
+                rethrow(ME); % optional: rethrow to see the error in MATLAB
+            end
+
             % Reset UserData so next run won't hang
-            app.saveandexitButton.UserData = [];
-            MetaT=app.MetaT;
-            app.delete;
+            if isvalid(app) && isprop(app.saveandexitButton,'UserData')
+                app.saveandexitButton.UserData = [];
+            end
+
+            % Delete the app object cleanly
+            if isvalid(app)
+                delete(app);
+            end
         else
+
             %%
             if localsettings.check_gui_tasks
                 if height(MetaT)==length(localsettings.mod)
