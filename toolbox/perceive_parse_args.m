@@ -1,4 +1,4 @@
-function config = perceive_parse_args(files, sub, sesMedOffOn01, extended, gui, datafields, localsettings)
+function config = perceive_parse_args(files, sub, sesMedOffOn01, extended, gui, datafields)
 
 % parse and normalize inputs for perceive()
 
@@ -9,7 +9,6 @@ arguments
     extended {mustBeMember(extended,["","yes"])} = ''
     gui {mustBeMember(gui,["","yes"])} = 'yes'
     datafields {mustBeText} = ''
-    localsettings = struct()
 end
 
 % -----------------------------
@@ -70,20 +69,20 @@ end
 % -----------------------------
 % localsettings parsing
 % -----------------------------
-config.localsettings = localsettings;
-config.check_followup_time = false;
-config.check_gui_tasks = false;
-config.check_gui_med = false;
-
-if isfield(localsettings,'name')
-    switch localsettings.name
-        case 'Charite'
-            config.check_followup_time = true;
-            config.check_gui_tasks = true;
-            config.check_gui_med = true;
-            warning('Charité settings enabled.')
-    end
-end
+% config.localsettings = localsettings;
+% config.check_followup_time = false;
+% config.check_gui_tasks = false;
+% config.check_gui_med = false;
+% 
+% if isfield(localsettings,'name')
+%     switch localsettings.name
+%         case 'Charite'
+%             config.check_followup_time = true;
+%             config.check_gui_tasks = true;
+%             config.check_gui_med = true;
+%             warning('Charité settings enabled.')
+%     end
+% end
 
 % -----------------------------
 % task / acq / mod / run defaults

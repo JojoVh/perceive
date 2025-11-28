@@ -82,9 +82,9 @@ if isempty(config.session)
 
 else
     % compute follow-up time if needed
-    if isfield(config.localsettings, 'followup')
-        diffmonths = config.localsettings.followup{1}(3:end-1);
-    else
+    %if isfield(config.localsettings, 'followup')
+    %    diffmonths = config.localsettings.followup{1}(3:end-1);
+    %else
         d_implant = datetime(strrep(strtok(hdr.ImplantDate,'_'),'-',''), 'InputFormat','yyyyMMdd');
         d_session = hdr.SessionEndDate;
         % rawmonths = between(d_implant, d_session, 'months');
@@ -94,7 +94,7 @@ else
         diffmonths = interp1(presetmonths, presetmonths, diffmonths, 'nearest');
 
         diffmonths = num2str(diffmonths);
-    end
+    %end
     hdr.session = ['ses-Fu' pad(diffmonths,2,'left','0') 'm' config.session];
 end
 

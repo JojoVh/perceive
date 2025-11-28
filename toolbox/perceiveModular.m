@@ -1,4 +1,4 @@
-function perceiveModular(files, sub, sesMedOffOn01, extended, gui, localsettings)
+function perceiveModular(files, sub, sesMedOffOn01, extended, gui, localsettings_name)
 % HACKATHON
 % https://github.com/neuromodulation/perceive
 % Toolbox by Wolf-Julian Neumann
@@ -64,7 +64,7 @@ arguments
     gui {mustBeMember(gui,["","yes"])} = '';
     % '' means no gui, 'yes' means gui (default yes)
     %datafields {mustBeMember(datafields,["","BrainSenseLfp","BrainSenseSurvey","BrainSenseTimeDomain","CalibrationTests","DiagnosticData","EventSummary","Impedance","IndefiniteStreaming","LfpMontageTimeDomain","MostRecentInSessionSignalCheck","PatientEvents"])} ='';
-    localsettings ='';
+    localsettings_name  =''; %Charite Duesseldorf Wuerzburg default
 end
 %% OUTPUT
 % The script generates BIDS inspired subject and session folders with the
@@ -99,7 +99,7 @@ end
 %% perceive input
 
 % creates a config struct that contains all files, subjectIDs and further settings
-config = perceive_parse_args(files, sub, sesMedOffOn01, extended, gui, localsettings);
+config = perceive_parse_args(files, sub, sesMedOffOn01, extended, gui);
 
 % to avoid changing rest of the code, let us define files etc. (change later)
 files         = config.files;
@@ -107,14 +107,13 @@ sub           = config.subject;
 sesMedOffOn01 = config.session;
 extended      = config.extended;
 gui           = config.gui;
-localsettings = config.localsettings;
 task          = config.task;
 acq           = config.acq;
 mod           = config.mod;
 run           = config.run;
 
 %% set local settings
-localsettings=perceive_localsettings(localsettings);
+localsettings=perceive_localsettings(localsettings_name);
 datafields=localsettings.datafields;
 %% set global settings
 set(0,'DefaultFigureWindowStyle','normal') %prevents that figures are "docked" or "modal" as in live scripts
@@ -860,10 +859,20 @@ for idxFile = 1:length(files)
         MetaTOld = MetaT;
 
         if gui
+            %%% add the new tasks names
+            for i = 1:height(MetaT) %update the task name
+                % Concatenate existing taskItems with MetaT.task
+                mergedTasks = [localsettings.taskItems(:); MetaT.task(:)];
+
+                %  remove duplicates, preserve order
+                [~,idx] = unique(mergedTasks,'stable');
+                localsettings.taskItems = mergedTasks(idx);
+            end
+
             disp(['OPENING GUI' newline 'now confirm or adapt file naming through the GUI'])
 
             % Launch the App Designer GUI
-            app = perceive_gui(MetaT);
+            app = perceive_gui(MetaT, localsettings);
 
             % Ensure orderly shutdown if the user closes the window
             app.UIFigure.CloseRequestFcn = @(src,event) ...
@@ -895,36 +904,36 @@ for idxFile = 1:length(files)
                 delete(app);
             end
         else
-
+            error('I need to check the localsettings by JV')
             %%
-            if localsettings.check_gui_tasks
-                if height(MetaT)==length(localsettings.mod)
-                
-                    for i = 1:height(MetaT) %update the task name
-                        if contains(MetaT.perceiveFilename{i},'TASK')
-                            assert(contains(MetaT.perceiveFilename{i},localsettings.mod{i}))
-                            MetaT.perceiveFilename{i}=replace(MetaT.perceiveFilename{i},['TASK' digitsPattern(1) '_'],localsettings.task{i});
-                        end
-                    end
-                elseif all(strcmp(localsettings.task, 'Rest'))
-                    for i = 1:height(MetaT) 
-                          assert(contains(MetaT.perceiveFilename{i},'Rest'))
-                    
-                    end
-                else
-                    assert( height(MetaT)==length(localsettings.mod), 'Tasks and mods not listed the same as in json file')
-                end
-            end
-            if localsettings.check_gui_med %remove the recordings with different medication settings
-                if any(localsettings.remove_med)
-                    assert( height(MetaT)==length(localsettings.remove_med))
-                    for i = 1:height(MetaT)
-                        if localsettings.remove_med(i)
-                            MetaT.remove{i}=replace('keep','REMOVE');
-                        end
-                    end
-                end
-            end
+            % if localsettings.check_gui_tasks
+            %     if height(MetaT)==length(localsettings.mod)
+            % 
+            %         for i = 1:height(MetaT) %update the task name
+            %             if contains(MetaT.perceiveFilename{i},'TASK')
+            %                 assert(contains(MetaT.perceiveFilename{i},localsettings.mod{i}))
+            %                 MetaT.perceiveFilename{i}=replace(MetaT.perceiveFilename{i},['TASK' digitsPattern(1) '_'],localsettings.task{i});
+            %             end
+            %         end
+            %     elseif all(strcmp(localsettings.task, 'Rest'))
+            %         for i = 1:height(MetaT)
+            %             assert(contains(MetaT.perceiveFilename{i},'Rest'))
+            % 
+            %         end
+            %     else
+            %         assert( height(MetaT)==length(localsettings.mod), 'Tasks and mods not listed the same as in json file')
+            %     end
+            % end
+            % if localsettings.check_gui_med %remove the recordings with different medication settings
+            %     if any(localsettings.remove_med)
+            %         assert( height(MetaT)==length(localsettings.remove_med))
+            %         for i = 1:height(MetaT)
+            %             if localsettings.remove_med(i)
+            %                 MetaT.remove{i}=replace('keep','REMOVE');
+            %             end
+            %         end
+            %     end
+            % end
         end
 
         %do the file renaming according to the interface metatable
