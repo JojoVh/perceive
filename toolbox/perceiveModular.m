@@ -875,8 +875,7 @@ for idxFile = 1:length(files)
             app = perceive_gui(MetaT, localsettings);
 
             % Ensure orderly shutdown if the user closes the window
-            app.UIFigure.CloseRequestFcn = @(src,event) ...
-                set(app.saveandexitButton,'UserData','closed');
+            app.UIFigure.CloseRequestFcn = @(src,event) onAppClose(app);
 
             try
                 % Block until Save & Exit button or CloseRequestFcn changes UserData
@@ -903,6 +902,7 @@ for idxFile = 1:length(files)
             if isvalid(app)
                 delete(app);
             end
+
         else
             error('I need to check the localsettings by JV')
             %%
