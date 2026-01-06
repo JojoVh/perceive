@@ -53,7 +53,26 @@ Channel = strcat(hdr.chan, '_', side, '_', ch1, ch2);
 % parse per-run
 for idxRun = 1:length(runs)
     i = perceive_ci(runs{idxRun}, FirstPacketDateTime);
-    raw1 = [data(i).TimeDomainData]';
+
+    if i > 1
+        % Collect TimeDomainData for all indices in i into a cell array
+        tdCells = {data(i).TimeDomainData};   % 1 x n cell
+
+        % Compute lengths of each TimeDomainData entry
+        tdLengths = cellfun(@numel, tdCells);
+
+        % Check if all lengths are equal
+        if numel(unique(tdLengths)) == 1
+            % All equal -> proceed normally
+            raw1 = [tdCells{:}]';   % concatenate and transpose
+        else
+            % Lengths differ -> use fallback
+            raw1 = NaNfallback(data, i);
+        end
+    else
+        %i is 1 or less
+        raw1 = [data(i).TimeDomainData]'; end
+    end
 
     d = struct();
     d.hdr = hdr;
@@ -92,4 +111,17 @@ for idxRun = 1:length(runs)
     alldata_bstd{end+1} = d;
 end
 
+
+function raw1=NaNfallback(data,i)
+% ---- NaN-padding fallback ----
+        td = {data(i).TimeDomainData};
+        td = cellfun(@(v) v(:)', td, 'UniformOutput', false);
+    
+        lens = cellfun(@numel, td);
+        maxL = max(lens);
+    
+        raw1 = nan(numel(td), maxL);
+        for k = 1:numel(td)
+            raw1(k, 1:lens(k)) = td{k};
+        end
 end
