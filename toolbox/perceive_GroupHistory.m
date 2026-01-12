@@ -56,23 +56,51 @@ for a = 1:length(files)
     disp(['RUNNING ' filename])
 
     js = jsondecode(fileread(filename));
-  
+
     my_settings=struct();
     my_settings.GroupHistory = struct();
     if isfield(js,'GroupHistory')
-        for i=1:size(js.GroupHistory,1)
-            sessiondate=js.GroupHistory(i).SessionDate;
-            if any([js.GroupHistory(i).Groups(:).ActiveGroup])
-                gr=find([js.GroupHistory(i).Groups(:).ActiveGroup]);
-                settings=js.GroupHistory(i).Groups(gr);                
-            else
-                settings='None active';
+        for i = 1:numel(js.GroupHistory)
+
+            sessiondate = js.GroupHistory(i).SessionDate;
+            groups = js.GroupHistory(i).Groups;   % cell array
+            activeStructs = [];                   % will store matching structs
+
+            if ~isempty(groups)
+
+                % Loop through each cell safely
+                for c = 1:numel(groups)
+                    g = groups{c};   % struct array inside this cell
+
+                    % Skip if empty or not a struct
+                    if ~isstruct(g) || isempty(g)
+                        continue
+                    end
+
+                    % Only use structs that actually have the field ActiveGroup
+                    if isfield(g, 'ActiveGroup')
+                        idx = find([g.ActiveGroup]);
+                        if ~isempty(idx)
+                            activeStructs = [activeStructs; g(idx)]; %#ok<AGROW>
+                        end
+                    end
+                end
             end
-            
-            my_settings.GroupHistory(i).Sessiondate=sessiondate;
-            my_settings.GroupHistory(i).Settings=settings;
+
+            % Decide what to store
+            if isempty(activeStructs)
+                settings = 'None active';
+            else
+                settings = activeStructs;
+            end
+
+            my_settings.GroupHistory(i).Sessiondate = sessiondate;
+            my_settings.GroupHistory(i).Settings = settings;
+
         end
-        
+
+
+
         jsonString = jsonencode(my_settings,'PrettyPrint', true);
     
         % Save the JSON string to a file
