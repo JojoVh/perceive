@@ -530,7 +530,7 @@ for idxFile = 1:length(files)
                         xlabel('Time [s]')
                         title(strrep({hdr.subject,hdr.session,'All CalibrationTests'},'_',' '))
                         %savefig(fullfile(hdr.fpath,[hdr.fname '_run-AllCalibrationTests.fig']))
-                        perceive_print(fullfile(hdr.fpath,[hdr.fname '_run-AllCalibrationTests']))
+                        perceive_print(fullfile(hdr.fpath,[hdr.fname '_mod-CalibrationTests']))
 
 
                         for c = 1:length(runs)
@@ -560,7 +560,7 @@ for idxFile = 1:length(files)
                             d.hdr.label = d.label;
                             d.hdr.Fs = d.fsample;
 
-                            d.fname = [hdr.fname '_run-CT' char(datetime(runs{c},'Inputformat','yyyy-MM-dd HH:mm:ss.SSS','format','yyyyMMddhhmmss')) '_' num2str(c)];
+                            d.fname = [hdr.fname '_mod-CalibrationTests_run-' char(datetime(runs{c},'Inputformat','yyyy-MM-dd HH:mm:ss.SSS','format','yyyyMMddhhmmss')) ];%'_' num2str(c)];
                             % TODO: set if needed:
                             %d.keepfig = false; % do not keep figure with this signal open
                             alldata{length(alldata)+1} = d;
