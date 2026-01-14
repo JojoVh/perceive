@@ -61,7 +61,7 @@ end
 % -----------------------------
 % session setting
 % -----------------------------
-config.session = sesMedOffOn01;
+config.session = char(sesMedOffOn01); %this removes the "" and converts to ''
 if isempty(sesMedOffOn01)
     warning('Session not specified — session name will be derived from date + battery.')
 end
