@@ -7,13 +7,15 @@ function perceiveModular(files, sub, sesMedOffOn01, extended, gui, localsettings
 % Contributors Wolf-Julian Neumann, Tomas Sieger, Gerd Tinkhauser
 % This is an open research tool that is not intended for clinical purposes.
 %F
-% INPUT:
+%% INPUT summary:
 % file          ["", 'Report_Json_Session_Report_20200115T123657.json', {'Report_Json_Session_Report_20200115T123657.json','Report_Json_Session_Report_20200115T123658.json'}, ...]
 % sub           ["", 7, 21 , "021", ... ]
 % sesMedOffOn01 ["","MedOff01","MedOn01","MedOff02","MedOn02","MedOff03","MedOn03","MedOffOn01"]
 % extended      ["","yes"] %% gives an extensive output of chronic, calibration, lastsignalcheck, diagnostic, impedance and snapshot data
 % gui           ["","yes"] %% gives option to skip gui by default settings
-%% INPUT
+% localsettings_name  ["","default","charite","duesseldorf","wuerzburg","...."] with the name refering to the config/localsettings_default.json localsettings_charite.json or customized localsettings.json file
+% 
+%% INPUT overview
     % files:
     % All input is optional, you can specify files as cell or character array
     % (e.g. files = 'Report_Json_Session_Report_20200115T123657.json')
@@ -37,7 +39,7 @@ function perceiveModular(files, sub, sesMedOffOn01, extended, gui, localsettings
     % '' means not extended, 'yes' means extended (default no)
 
     % '' means no gui, 'yes' means gui (default yes)
-%% INPUT
+%% INPUT arguments
 arguments
     files {mustBeA(files,["char","cell"])} = '';
     % files:
@@ -66,14 +68,14 @@ arguments
     %datafields {mustBeMember(datafields,["","BrainSenseLfp","BrainSenseSurvey","BrainSenseTimeDomain","CalibrationTests","DiagnosticData","EventSummary","Impedance","IndefiniteStreaming","LfpMontageTimeDomain","MostRecentInSessionSignalCheck","PatientEvents"])} ='';
     localsettings_name  =''; %Charite Duesseldorf Wuerzburg default
 end
-%% OUTPUT
+%% OUTPUT Overview
 % The script generates BIDS inspired subject and session folders with the
 % ieeg format specifier. All time series data are being exported as
 % FieldTrip .mat files, as these require no additional dependencies for creation.
 % You can reformat with FieldTrip and SPM to MNE
 % python and other formats (e.g. using fieldtrip2fiff([fullname '.fif'],data))
 
-%% Recording type output naming
+%% OUTPUT Recording type output naming
 % Each of the FieldTrip data files correspond to a specific aspect of the Recording session:
 % LMTD = LFP Montage Time Domain - BrainSenseSurvey
 % IS = Indefinite Streaming - BrainSenseStreaming
@@ -95,7 +97,6 @@ end
 % IMPROVE CHRONIC DIAGNOSTIC READINGS
 % ADD Lead DBS Integration for electrode location
 
-%ubersichtzeit = table('Size',[1 8],'VariableNames',{'fname','FirstPackagetime','TicksMSecStart','TicksMSecEnd','TDTimeStart','TDTimeEnd','SumGlobalPackages','Triallength'},'VariableTypes',{'string','string','double','double','double','double','double','double'}) 
 %% perceive input
 
 % creates a config struct that contains all files, subjectIDs and further settings
