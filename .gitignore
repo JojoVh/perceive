@@ -8,3 +8,15 @@ sub*/
 tests/Report_Json_Session_Report_MOCK*_GroupHistory.json
 *generate_Mock_call*
 *.xlsx
+
+# Go to the config folder
+perceive/toolbox/config/
+
+# Ignore ALL perceive_localsettings*.json files
+perceive/toolbox/config/perceive_localsettings*.json
+
+# BUT keep these specific ones
+!perceive/toolbox/config/perceive_localsettings_charite.json
+!perceive/toolbox/config/perceive_localsettings_default.json
+!perceive/toolbox/config/perceive_localsettings_duesseldorf.json
+!perceive/toolbox/config/perceive_localsettings_wuerzburg.json
