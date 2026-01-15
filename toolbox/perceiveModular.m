@@ -39,13 +39,14 @@ arguments
     localsettings_name  ='';
     % default is '', which is default
     % alternative: Charite Duesseldorf Wuerzburg or custom naming
-    % names refer to the perceive\toolbox\config which contains
+    % names refer to the perceive\toolbox\config or any other file in your matlab folder which contains
     % perceive_localsettings_default.json
     % perceive_localsettings_charite.json
     % perceive_localsettings_duesseldorf.json
     % perceive_localsettings_wuerzburg.json
-    % perceive_localsettings_"custom name".json with custom name to be filled in, together with custom settings
-    % possible datafields are  ["","BrainSenseLfp","BrainSenseSurvey","BrainSenseTimeDomain","CalibrationTests","DiagnosticData","EventSummary","Impedance","IndefiniteStreaming","LfpMontageTimeDomain","MostRecentInSessionSignalCheck","PatientEvents"])} ='';
+    % perceive_localsettings_"custom name".json with custom name to be
+    % filled in, together with custom settings. Needs to be in matlab path, needs start with perceive_localsettings_*json, but does not need to be in the perceive\toolbox\config folder  
+    % possible datafields from Medtronic Percept are  ["","BrainSenseLfp","BrainSenseSurvey","BrainSenseTimeDomain","CalibrationTests","DiagnosticData","EventSummary","Impedance","IndefiniteStreaming","LfpMontageTimeDomain","MostRecentInSessionSignalCheck","PatientEvents"])} ='';
 
 end
 %% INPUT use examples:
