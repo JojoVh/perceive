@@ -391,74 +391,8 @@ for idxFile = 1:length(files)
                 case 'CalibrationTests'
 
                     if extended
-                        FirstPacketDateTime = strrep(strrep({data(:).FirstPacketDateTime},'T',' '),'Z','');
-                        runs = unique(FirstPacketDateTime);
-                        Pass = {data(:).Pass};
-                        tmp =  {data(:).GlobalSequences};
-                        for c = 1:length(tmp)
-                            GlobalSequences{c,:} = str2num(tmp{c});
-                        end
-                        tmp =  {data(:).GlobalPacketSizes};
-                        for c = 1:length(tmp)
-                            GlobalPacketSizes{c,:} = str2num(tmp{c});
-                        end
-
-                        figure
-                        for c = 1:length(data)
-                            fsample = data(c).SampleRateInHz;
-                            gain=[data(c).Gain]';
-                            [tmp1,tmp2] = strtok(strrep({data(c).Channel}','_AND',''),'_');
-                            ch1 = strrep(strrep(strrep(strrep(tmp1,'ZERO','0'),'ONE','1'),'TWO','2'),'THREE','3');
-
-                            [tmp1,tmp2] = strtok(tmp2,'_');
-                            ch2 = strrep(strrep(strrep(strrep(tmp1,'ZERO','0'),'ONE','1'),'TWO','2'),'THREE','3');
-                            side = strrep(strrep(strtok(tmp2,'_'),'LEFT','L'),'RIGHT','R');
-                            Channel(c) = strcat(hdr.chan,'_',side,'_', ch1, ch2);
-                            tdtmp = zscore(data(c).TimeDomainData)./10+c;
-                            ttmp=[1:length(tdtmp)]./fsample;
-                            plot(ttmp,tdtmp)
-                            hold on
-                        end
-                        xlim([ttmp(1),ttmp(end)])
-                        set(gca,'YTick',1:c,'YTickLabel',strrep(Channel,'_',' '),'YTickLabelRotation',45)
-                        xlabel('Time [s]')
-                        title(strrep({hdr.subject,hdr.session,'All CalibrationTests'},'_',' '))
-                        %savefig(fullfile(hdr.fpath,[hdr.fname '_run-AllCalibrationTests.fig']))
-                        perceive_print(fullfile(hdr.fpath,[hdr.fname '_mod-CalibrationTests']))
-
-
-                        for c = 1:length(runs)
-                            d=[];
-
-                            i=perceive_ci(runs{c},FirstPacketDateTime);
-                            raw=[data(i).TimeDomainData]';
-                            d=[];
-                            d.hdr = hdr;
-                            d.datatype = datafields{idxDatafield};
-                            d.hdr.CT.Pass=strrep(strrep(unique(strtok(Pass(i),'_')),'FIRST','1'),'SECOND','2');
-                            d.hdr.CT.GlobalSequences=GlobalSequences(i,:);
-                            d.hdr.CT.GlobalPacketSizes=GlobalPacketSizes(i,:);
-                            d.hdr.CT.FirstPacketDateTime = runs{c};
-
-                            d.label=Channel(i);
-                            d.trial{1} = raw;
-
-                            d.time{1} = linspace(seconds(datetime(runs{c},'Inputformat','yyyy-MM-dd HH:mm:ss.SSS')-hdr.d0),seconds(datetime(runs{c},'Inputformat','yyyy-MM-dd HH:mm:ss.SSS')-hdr.d0)+size(d.trial{1},2)/fsample,size(d.trial{1},2));
-
-                            d.fsample = fsample;
-                            %firstsample = 1+round(fsample*seconds(datetime(runs{c},'Inputformat','yyyy-MM-dd HH:mm:ss.SSS')-datetime(FirstPacketDateTime{1},'Inputformat','yyyy-MM-dd HH:mm:ss.SSS')));
-                            firstsample = set_firstsample(data(c).TicksInMses);
-                            lastsample = firstsample+size(d.trial{1},2);
-                            d.sampleinfo(1,:) = [firstsample lastsample];
-                            d.trialinfo(1) = c;
-                            d.hdr.label = d.label;
-                            d.hdr.Fs = d.fsample;
-
-                            d.fname = [hdr.fname '_mod-CalibrationTests_run-' char(datetime(runs{c},'Inputformat','yyyy-MM-dd HH:mm:ss.SSS','format','yyyyMMddhhmmss')) ];%'_' num2str(c)];
-                            % TODO: set if needed:
-                            %d.keepfig = false; % do not keep figure with this signal open
-                            alldata{length(alldata)+1} = d;
-                        end
+                       alldata_ct = perceive_extract_calibrationtests(data, hdr);
+                       alldata = [alldata, alldata_ct];
                     end
 
                 case 'SenseChannelTests'
