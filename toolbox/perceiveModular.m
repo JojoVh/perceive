@@ -1,73 +1,56 @@
 function perceiveModular(files, sub, sesMedOffOn01, extended, gui, localsettings_name)
-% HACKATHON
-% https://github.com/neuromodulation/perceive
+% RETUNE HACKATHON branch 06.2025
 % Toolbox by Wolf-Julian Neumann
-% v1.0 update by J Vanhoecke
-% Merge requests from Jennifer Behnke and Mansoureh Fahimi
-% Contributors Wolf-Julian Neumann, Tomas Sieger, Gerd Tinkhauser
+% Contributors Wolf-Julian Neumann, Tomas Sieger, Gerd Tinkhauser, Jennifer Behnke, Mansoureh Fahimi, Jonathan Kaplan, Jojo Vanhoecke (contact to Jojo Vanhoecke)
 % This is an open research tool that is not intended for clinical purposes.
-%
-%% INPUT summary:
-% file          ["", 'Report_Json_Session_Report_20200115T123657.json', {'Report_Json_Session_Report_20200115T123657.json','Report_Json_Session_Report_20200115T123658.json'}, ...]
-% sub           ["", 7, 21 , "021", ... ]
-% sesMedOffOn01 ["","MedOff01","MedOn01","MedOff02","MedOn02","MedOff03","MedOn03","MedOffOn01"]
-% extended      ["","yes"] %% gives an extensive output of chronic, calibration, lastsignalcheck, diagnostic, impedance and snapshot data
-% gui           ["","yes"] %% gives option to skip gui by default settings
-% localsettings_name  ["","default","charite","duesseldorf","wuerzburg","...."] with the name refering to the config/localsettings_default.json localsettings_charite.json or customized localsettings.json file
-% 
-%% INPUT overview
-    % files:
-    % All input is optional, you can specify files as cell or character array
-    % (e.g. files = 'Report_Json_Session_Report_20200115T123657.json')
-    % if files isn't specified or remains empty, it will automatically include
-    % all files in the current working directory
-    % if no files in the current working directory are found, a you can choose
-    % files via the MATLAB uigetdir window.
 
-    % sub:
-    % you can specify a subject ID for each file in case you want to follow an
-    % IRB approved naming scheme for file export
-    % (e.g. run perceive('Report_Json_Session_Report_20200115T123657.json','Charite_sub-001')
-    % if unspecified or left empy, the subjectID will be created from:
-    % ImplantDate, first letter of disease type and target (e.g. sub-2020110DGpi)
-    
-    %task = 'TASK'; %All types of tasks: Rest, RestTap, FingerTapL, FingerTapR, UPDRS, MovArtArms,MovArtStand,MovArtHead,MovArtWalk
-    %acq = ''; %StimOff, StimOnL, StimOnR, StimOnB, Burst
-    %mod = ''; %BrainSense, IS, LMTD, Chronic + Bip Ring RingL RingR SegmIntraL SegmInterL SegmIntraR SegmInterR
-    %run = ''; %numeric
-    
-    % '' means not extended, 'yes' means extended (default no)
-
-    % '' means no gui, 'yes' means gui (default yes)
-%% INPUT arguments
+%% INPUT arguments overview
 arguments
     files {mustBeA(files,["char","cell"])} = '';
     % files:
-    % All input is optional, you can specify files as cell or character array
-    % (e.g. files = 'Report_Json_Session_Report_20200115T123657.json')
-    % if files isn't specified or remains empty, it will automatically include
-    % all files in the current working directory
-    % if no files in the current working directory are found, a you can choose
-    % files via the MATLAB uigetdir window.
+    % files e.g. ["", 'Report_Json_Session_Report_20200115T123657.json', {'Report_Json_Session_Report_20200115T123657.json','Report_Json_Session_Report_20200115T123658.json'}]
+    % use e.g. perceive('Report_Json_Session_Report_20200115T123657.json')
+    %
+    % All input is optional, you can specify files as cell or character array 
+    % if files isn't specified or remains empty, it will automatically include all files in the current working directory
+    % if no files in the current working directory are found, a you can choose files via the MATLAB uigetdir window.
+
     sub {mustBeA(sub,["char","cell","numeric"])} = '';
-    % sub:
-    % you can specify a subject ID for each file in case you want to follow an
-    % IRB approved naming scheme for file export
-    % (e.g. run perceive('Report_Json_Session_Report_20200115T123657.json','Charite_sub-001')
+    % subject:
+    % input e.g. ["", 7, 21 , "021", ... ]
+    % use  e.g. perceive('Report_Json_Session_Report_20200115T123657.json','Charite_sub-001')
+    % you can specify a subject ID for each file in case you want to follow an IRB approved naming scheme for file export
+    % 
     % if unspecified or left empy, the subjectID will be created from:
     % ImplantDate, first letter of disease type and target (e.g. sub-2020110DGpi)
+
     sesMedOffOn01 {mustBeMember(sesMedOffOn01,["","MedOff","MedOn","MedDaily","MedOff01","MedOn01","MedOff02","MedOn02","MedOff03","MedOn03","MedOffOn01","MedOffOn02","MedOffOn03","MedOnPostOpIPG","MedOffPostOpIPG","Unknown", "PostOp"])} = '';
-    %task = 'TASK'; %All types of tasks: Rest, RestTap, FingerTapL, FingerTapR, UPDRS, MovArtArms,MovArtStand,MovArtHead,MovArtWalk
-    %acq = ''; %StimOff, StimOnL, StimOnR, StimOnB, Burst
-    %mod = ''; %BrainSense, IS, LMTD, Chronic + Bip Ring RingL RingR SegmIntraL SegmInterL SegmIntraR SegmInterR
-    %run = ''; %numeric
+    % session:
+    % input e.g. ["","MedOff","MedOn","MedDaily","MedOff01","MedOn01"]
+    % 
+
     extended {mustBeMember(extended,["","yes"])} = '';
     % '' means not extended, 'yes' means extended (default no)
+    % gives an extensive output of chronic, calibration, lastsignalcheck, diagnostic, impedance and snapshot data
+
     gui {mustBeMember(gui,["","yes"])} = '';
     % '' means no gui, 'yes' means gui (default yes)
-    %datafields {mustBeMember(datafields,["","BrainSenseLfp","BrainSenseSurvey","BrainSenseTimeDomain","CalibrationTests","DiagnosticData","EventSummary","Impedance","IndefiniteStreaming","LfpMontageTimeDomain","MostRecentInSessionSignalCheck","PatientEvents"])} ='';
-    localsettings_name  =''; %Charite Duesseldorf Wuerzburg default
+
+    localsettings_name  ='';
+    % default is '', which is default
+    % alternative: Charite Duesseldorf Wuerzburg or custom naming
+    % names refer to the perceive\toolbox\config which contains
+    % perceive_localsettings_default.json
+    % perceive_localsettings_charite.json
+    % perceive_localsettings_duesseldorf.json
+    % perceive_localsettings_wuerzburg.json
+    % perceive_localsettings_"custom name".json with custom name to be filled in, together with custom settings
+    % possible datafields are  ["","BrainSenseLfp","BrainSenseSurvey","BrainSenseTimeDomain","CalibrationTests","DiagnosticData","EventSummary","Impedance","IndefiniteStreaming","LfpMontageTimeDomain","MostRecentInSessionSignalCheck","PatientEvents"])} ='';
+
 end
+%% INPUT use examples:
+
+
 %% OUTPUT Overview
 % The script generates BIDS inspired subject and session folders with the
 % ieeg format specifier. All time series data are being exported as
@@ -84,6 +67,12 @@ end
 % BSTD = BrainSense Time Domain (250 Hz raw data corresponding to the BSL file)
 % BrainSenseBip = combination of BSL and BSTD into Brainsense with LFP signal/stim settings.
 
+% %task = 'TASK'; %All types of tasks: Rest, RestTap, FingerTapL, FingerTapR, UPDRS, MovArtArms,MovArtStand,MovArtHead,MovArtWalk or any tasks added over the GUI or over the \toolbox\config\perceive_localsettings_"custom name".json
+    %acq = ''; %StimOff, StimOnL, StimOnR, StimOnB, Burst
+    %mod = ''; %BrainSense, IS, LMTD, Chronic + Bip Ring RingL RingR SegmIntraL SegmInterL SegmIntraR SegmInterR
+    %run = ''; %numeric
+
+%% references
 % for modalities see white paper: https://www.medtronic.com/content/dam/medtronic-wide/public/western-europe/products/neurological/percept-pc-neurostimulator-whitepaper.pdf
 % Jimenez-Shahed, J. (2021). Expert Review of Medical Devices, 18(4), 319–332. https://doi.org/10.1080/17434440.2021.1909471
 % Yohann Thenaisie et al (2021) J. Neural Eng. 18 042002 DOI https://doi.org/10.1088/1741-2552/ac1d5b
