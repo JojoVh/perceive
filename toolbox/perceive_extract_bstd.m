@@ -25,6 +25,7 @@ mod = 'mod-BSTD';
 fsample = data.SampleRateInHz;
 FirstPacketDateTime = strrep(strrep({data(:).FirstPacketDateTime}, 'T', ' '), 'Z', '');
 runs = unique(FirstPacketDateTime);
+
 Pass = {data(:).Pass};
 GlobalSequences = cell(size(data));
 GlobalPacketSizes = cell(size(data));
@@ -71,7 +72,7 @@ for idxRun = 1:length(runs)
         end
     else
         %i is 1 or less
-        raw1 = [data(i).TimeDomainData]'; end
+        raw1 = [data(i).TimeDomainData]'; 
     end
 
     d = struct();
@@ -109,7 +110,10 @@ for idxRun = 1:length(runs)
     end
 
     alldata_bstd{end+1} = d;
-end
+
+end % for idxRun
+
+end %function
 
 
 function raw1=NaNfallback(data,i)
