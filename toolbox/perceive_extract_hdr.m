@@ -65,10 +65,11 @@ end
 % ----------------------------
 if isempty(config.subject)
     % generate subject from ImplantDate, Diagnosis, LeadLocation
+    diagLetter = hdr.Diagnosis(~isempty(hdr.Diagnosis));
     if ~isempty(hdr.ImplantDate) && ~isnan(str2double(hdr.ImplantDate(1)))
-        hdr.subject = ['sub-' strrep(strtok(hdr.ImplantDate,'_'),'-','') hdr.Diagnosis(1) hdr.LeadLocation];
+        hdr.subject = ['sub-' strrep(strtok(hdr.ImplantDate,'_'),'-','') diagLetter hdr.LeadLocation];
     else
-        hdr.subject = ['sub-000' hdr.Diagnosis(1) hdr.LeadLocation];
+        hdr.subject = ['sub-000' diagLetter hdr.LeadLocation];
     end
 else
     hdr.subject = config.subject;

@@ -115,8 +115,14 @@ for idxFile = 1:length(files)
     filename = files{idxFile};
     disp(['RUNNING ' filename])
 
-    % load and pseudonymize json
+    % load and pseudonymize json + check whether is Percept Medtronic json
     js = perceive_load_json(config.files{idxFile});
+
+    % check whether js file needs to be skipped (if not Percept Medtronic)
+    if isempty(js)
+        warning('Skipping file %s because it is not compatible with Percept Medtronic JSON format', filename)
+        continue
+    end
 
     % build hdr struct containing relevant patient data
     hdr = perceive_extract_hdr(js, filename, config);

@@ -4,10 +4,11 @@ function js = perceive_load_json(jsonfile)
 
     js = jsondecode(fileread(jsonfile));
 
-    if isfield(js, 'PatientInformation')
-
+    % check that the json file is a Percept Medtronic file
+    if ~isfield(js, {'SessionDate','DeviceInformation','SessionEndDate','BatteryInformation'})
+        js='';
+    elseif isfield(js, 'PatientInformation')
         js = pseudonymize(js); % Optional
-
     end
 end
 
