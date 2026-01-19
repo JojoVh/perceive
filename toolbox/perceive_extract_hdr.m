@@ -28,6 +28,26 @@ end
 % fix datetime formats
 hdr.SessionDate = datetime(strrep(js.SessionDate(1:end-1),'T',' '));
 hdr.SessionEndDate = datetime(strrep(js.SessionEndDate(1:end-1),'T',' '));
+% check for abnormal end
+if isfield(js, 'AbnormalEnd')
+    if js.AbnormalEnd
+        warning('This recording had an abnormal end');
+        hdr.d0 = datetime(js.DeviceInformation.Final.DeviceDateTime(1:10));
+
+        if isempty(js.SessionEndDate)
+            hdr.SessionEndDate = datetime(strrep(js.SessionDate(1:end-1),'T',' '));
+        else
+            assert( isa(hdr.SessionEndDate,'datetime') && ...
+                ~isnat(hdr.SessionEndDate) && ...
+                all(~isundefined(hdr.SessionEndDate)), ...
+                'hdr.SessionEndDate must be a valid, non-NaT datetime.' );
+        end
+    else
+        hdr.d0 = datetime(js.SessionEndDate(1:10));
+    end
+else
+    hdr.d0 = datetime(js.SessionEndDate(1:10));
+end
 
 % diagnosis
 if isfield(js.PatientInformation, "Final") && ~isempty(js.PatientInformation.Final.Diagnosis)
@@ -122,13 +142,7 @@ hdr.fname = sprintf('%s_%s_task-%s_acq-%s', ...
 % channel label
 hdr.chan = ['LFP_' hdr.LeadLocation];
 
-% abnormal end check
-if isfield(js, 'AbnormalEnd') && js.AbnormalEnd
-    warning('This recording had an abnormal end');
-    hdr.d0 = datetime(js.DeviceInformation.Final.DeviceDateTime(1:10));
-else
-    hdr.d0 = datetime(js.SessionEndDate(1:10));
-end
+
 
 % ----------------------------
 % version check
