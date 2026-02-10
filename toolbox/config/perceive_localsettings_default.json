@@ -85,5 +85,6 @@
     "DiagnosticData",
     "BrainSenseSurveysTimeDomain",
     "BrainSenseSurveys"
-  ]
+  ],
+  "devmode": false
 }
