@@ -29,6 +29,7 @@ end
 %% --- Plot all calibration tests ---
 figure
 Channel = strings(1,length(data));
+defaultBlue = [0 0.4470 0.7410]; % MATLAB default blue
 
 for c = 1:length(data)
     fsample = data(c).SampleRateInHz;
@@ -44,10 +45,10 @@ for c = 1:length(data)
 
     Channel(c) = strcat(hdr.chan,'_',side,'_', ch1, ch2);
 
-    % Plot
+    % Plot with default blue color
     tdtmp = zscore(data(c).TimeDomainData)./10 + c;
     ttmp = (1:length(tdtmp)) ./ fsample;
-    plot(ttmp, tdtmp)
+    plot(ttmp, tdtmp, 'Color', defaultBlue)
     hold on
 end
 
@@ -56,6 +57,7 @@ set(gca,'YTick',1:c,'YTickLabel',strrep(Channel,'_',' '),'YTickLabelRotation',45
 xlabel('Time [s]')
 title(strrep({hdr.subject, hdr.session, 'All CalibrationTests'}, '_', ' '))
 perceive_print(fullfile(hdr.fpath, [hdr.fname '_mod-CalibrationTests']))
+
 
 %% --- Build output structures per run ---
 for c = 1:length(runs)
@@ -81,7 +83,12 @@ for c = 1:length(runs)
     d.trial{1} = raw;
 
     % Time axis
-    t0 = seconds(datetime(runs{c}, 'Inputformat','yyyy-MM-dd HH:mm:ss.SSS') - hdr.d0);
+    % OLD
+    % t0 = seconds(datetime(runs{c}, 'Inputformat','yyyy-MM-dd HH:mm:ss.SSS') - hdr.d0);
+
+    % NEW
+    t0 = seconds(timeofday(datetime(runs{c}, 'Inputformat','yyyy-MM-dd HH:mm:ss.SSS')));
+    
     d.time{1} = linspace(t0, t0 + size(d.trial{1},2)/fsample, size(d.trial{1},2));
 
     d.fsample = fsample;
@@ -96,7 +103,7 @@ for c = 1:length(runs)
     d.hdr.Fs = d.fsample;
 
     % Filename
-    d.fname = [hdr.fname '_mod-CalibrationTests_run-' ...
+    d.fname = [hdr.fname '_mod-CalibrationTests' ...
                char(datetime(runs{c}, 'Inputformat','yyyy-MM-dd HH:mm:ss.SSS', ...
                'format','yyyyMMddhhmmss'))];
 
