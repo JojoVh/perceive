@@ -39,7 +39,10 @@ if isfield(data.LFPTrendLogs,'HemisphereLocationDef_Left')
         d.datatype = 'DiagnosticData.LFPTrends';
         d.label = {'LFP_LEFT','STIM_LEFT'};
         d.trial{1} = [clfp(i); cstim(i)];
-        d.time{1} = linspace(seconds(cdt(1) - hdr.d0), seconds(cdt(end) - hdr.d0), size(d.trial{1},2));
+%       OLD
+        %d.time{1} = linspace(seconds(cdt(1) - hdr.d0), seconds(cdt(end) - hdr.d0), size(d.trial{1},2));
+%       NEW
+        d.time{1} = linspace(seconds(timeofday(cdt(1))), seconds(timeofday(cdt(end))), size(d.trial{1},2));
         d.realtime{1} = cdt;
 
         if length(d.time{1}) > 1
@@ -77,7 +80,10 @@ if isfield(data.LFPTrendLogs,'HemisphereLocationDef_Right')
         d.datatype = 'DiagnosticData.LFPTrends';
         d.label = {'LFP_RIGHT','STIM_RIGHT'};
         d.trial{1} = [clfp(i); cstim(i)];
-        d.time{1} = linspace(seconds(cdt(1) - hdr.d0), seconds(cdt(end) - hdr.d0), size(d.trial{1},2));
+        % OLD
+        %         d.time{1} = linspace(seconds(cdt(1) - hdr.d0), seconds(cdt(end) - hdr.d0), size(d.trial{1},2));
+        % NEW
+        d.time{1} = linspace(seconds(timeofday(cdt(1))), seconds(timeofday(cdt(end))), size(d.trial{1},2));
         d.realtime{1} = cdt;
 
         if length(d.time{1}) > 1
@@ -96,6 +102,7 @@ if isfield(data.LFPTrendLogs,'HemisphereLocationDef_Right')
         alldata_diagnostic_lfp{end+1} = d;
     end
 end
+warning('DiagnosticData.LFPTrends has a "realtime" that is not based on MTicks but just on linear interpolation of "DateTime"')
 
 % combined matrix
 LFP = []; STIM = [];
