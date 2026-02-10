@@ -30,7 +30,10 @@ end
 
 switch mode
     case 'png'
-        print(gcf,fullfile(fold,file),'-dpng','-r300','-opengl');
+        
+        exportgraphics(gcf, [fullfile(fold,file) '.png'] , 'Resolution', 200);
+        % if there is a white vertical box there, it means that the resolution is too high
+
     case 'pdf'
         % save the current orientation
         or=get(gcf,'PaperOrientation');
