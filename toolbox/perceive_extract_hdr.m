@@ -25,29 +25,59 @@ for i = 1:length(infofields)
     end
 end
 
-% fix datetime formats
-hdr.SessionDate = datetime(strrep(js.SessionDate(1:end-1),'T',' '));
-hdr.SessionEndDate = datetime(strrep(js.SessionEndDate(1:end-1),'T',' '));
-% check for abnormal end
-if isfield(js, 'AbnormalEnd')
-    if js.AbnormalEnd
-        warning('This recording had an abnormal end');
-        hdr.d0 = datetime(js.DeviceInformation.Final.DeviceDateTime(1:10));
+hdr.SessionEndDate = datetime(strrep(js.SessionEndDate(1:end-1),'T',' ')); %this is the date of the session, do not take startdate
+%%%%%%%%%%%%%%%%%%%%%%%% SESSION TIME CHECK %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Check if hdr.SessionEndDate is valid
+if ~isdatetime(hdr.SessionEndDate) || isnat(hdr.SessionEndDate)
 
-        if isempty(js.SessionEndDate)
-            hdr.SessionEndDate = datetime(strrep(js.SessionDate(1:end-1),'T',' '));
-        else
-            assert( isa(hdr.SessionEndDate,'datetime') && ...
-                ~isnat(hdr.SessionEndDate) && ...
-                all(~isundefined(hdr.SessionEndDate)), ...
-                'hdr.SessionEndDate must be a valid, non-NaT datetime.' );
+    success = false;
+
+    % --- First attempt: js.SessionDate ---
+    if isfield(js, 'SessionDate')
+        dt = tryParseDate(js.SessionDate);
+        if ~isnat(dt)
+            hdr.SessionEndDate = dt;
+            success = true;
         end
-    else
-        hdr.d0 = datetime(js.SessionEndDate(1:10));
     end
-else
-    hdr.d0 = datetime(js.SessionEndDate(1:10));
+
+    % --- Second attempt: js.DeviceInformation.Final.DeviceDateTime ---
+    if ~success && isfield(js, 'DeviceInformation') ...
+               && isfield(js.DeviceInformation, 'Final') ...
+               && isfield(js.DeviceInformation.Final, 'DeviceDateTime')
+
+        dt = tryParseDate(js.DeviceInformation.Final.DeviceDateTime);
+        if ~isnat(dt)
+            hdr.SessionEndDate = dt;
+            success = true;
+        end
+    end
+
+    % --- If everything fails ---
+    if ~success
+        error('SessionDateError', ...
+            ['Unable to determine a valid SessionEndDate. ', ...
+             'All available date sources failed.']);
+    end
 end
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    
+    
+    % fix datetime formats
+% hdr.SessionDate = datetime(strrep(js.SessionDate(1:end-1),'T',' '));
+% hdr.SessionEndDate = datetime(strrep(js.SessionEndDate(1:end-1),'T',' '));
+% hdr.d0 = datetime(js.SessionDate(1:10));
+% hdr.d1 = datetime(js.SessionDate(1:10));
+% 
+% % --- small validation check ---
+% if ~( isa(hdr.d0,'datetime') && ~isnat(hdr.d0) )
+%     error('Header:InvalidDate', ...
+%         'hdr.d0 must be a valid datetime with year, month, and day.');
+% end
+% 
+% 
+% hdr=checkDateConsistency(js, hdr);
 
 % diagnosis
 if isfield(js.PatientInformation, "Final") && ~isempty(js.PatientInformation.Final.Diagnosis)
@@ -106,15 +136,15 @@ else
     %if isfield(config.localsettings, 'followup')
     %    diffmonths = config.localsettings.followup{1}(3:end-1);
     %else
-        d_implant = datetime(strrep(strtok(hdr.ImplantDate,'_'),'-',''), 'InputFormat','yyyyMMdd');
-        d_session = hdr.SessionEndDate;
-        % rawmonths = between(d_implant, d_session, 'months');
-        presetmonths = [0,1,2,3,6,12,18,24,30,36,42,48,60,72,84,96,108,120]; % check this!!! --> different for different diagnoses
-        % diffmonths = interp1(presetmonths, presetmonths, rawmonths, 'nearest');
-        diffmonths = calmonths(between(d_implant, d_session));
-        diffmonths = interp1(presetmonths, presetmonths, diffmonths, 'nearest');
+    d_implant = datetime(strrep(strtok(hdr.ImplantDate,'_'),'-',''), 'InputFormat','yyyyMMdd');
+    d_session = hdr.SessionEndDate;
+    % rawmonths = between(d_implant, d_session, 'months');
+    presetmonths = [0,1,2,3,6,12,18,24,30,36,42,48,60,72,84,96,108,120]; % check this!!! --> different for different diagnoses
+    % diffmonths = interp1(presetmonths, presetmonths, rawmonths, 'nearest');
+    diffmonths = calmonths(between(d_implant, d_session));
+    diffmonths = interp1(presetmonths, presetmonths, diffmonths, 'nearest');
 
-        diffmonths = num2str(diffmonths);
+    diffmonths = num2str(diffmonths);
     %end
     hdr.session = ['ses-Fu' pad(diffmonths,2,'left','0') 'm' config.session];
 end
@@ -166,3 +196,75 @@ else
 end
 
 end
+
+function hdr = checkDateConsistency(js, hdr)
+    % raise an error in case of time differences with abnormal end, or check
+    % whether d0 is correct by dummy hdrd0
+
+    if isfield(js, 'AbnormalEnd')
+        if js.AbnormalEnd
+            warning('This recording had an abnormal end');
+
+            hdrd0 = datetime(js.DeviceInformation.Final.DeviceDateTime(1:10));
+
+            if isempty(js.SessionEndDate)
+                hdr.SessionEndDate = datetime(strrep(js.SessionDate(1:end-1), 'T', ' '));
+            else
+                assert( isa(hdr.SessionEndDate,'datetime') && ...
+                        ~isnat(hdr.SessionEndDate) && ...
+                        all(~isundefined(hdr.SessionEndDate)), ...
+                        'hdr.SessionEndDate must be a valid, non-NaT datetime.');
+            end
+        else
+            hdrd0 = datetime(js.SessionEndDate(1:10));
+        end
+    else
+        hdrd0 = datetime(js.SessionEndDate(1:10));
+    end
+
+    hdrd1 = js.SessionDate(1:10);
+
+    hdr.d0 = hdrd0;
+    % check d0 must be equal to d1
+    % if ~isequal(hdrd0, hdrd1)
+    %     error('HeaderMismatch:DateTimeError', ...
+    %         'hdr.d0 and hdr.d1 must match.\nValue of d0: %s\nValue of d1: %s', ...
+    %         char(hdrd0), char(hdrd1));
+    % end
+end
+
+function dt = tryParseDate(str)
+
+    dt = NaT;  % default if everything fails
+
+    if isempty(str)
+        return
+    end
+
+    % Clean ISO formatting
+    s = strrep(str, 'T', ' ');
+    s = strrep(s, 'Z', '');
+
+    % Try multiple formats
+    formats = { ...
+        'yyyy-MM-dd HH:mm:ss', ...
+        'yyyy-MM-dd HH:mm', ...
+        'yyyy-MM-dd', ...
+        'dd.MM.yyyy HH:mm:ss', ...
+        'dd.MM.yyyy HH:mm', ...
+        'dd.MM.yyyy' ...
+    };
+
+    for k = 1:numel(formats)
+        try
+            dtCandidate = datetime(s, 'InputFormat', formats{k});
+            if ~isnat(dtCandidate)
+                dt = dtCandidate;
+                return
+            end
+        catch
+            % try next format
+        end
+    end
+end
+
