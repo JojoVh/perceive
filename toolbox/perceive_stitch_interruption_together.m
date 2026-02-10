@@ -22,29 +22,106 @@ arguments
     save_file (1, 1) logical = false % Optional, default is false
 end
 
-recording_part = struct();
-i=0;
-while i<10
-    i=i+1;
-    recording_name = [recording_basename num2str(i) '.mat'];
-    if exist(recording_name,"file")
-        load(recording_name, 'data')
-        recording_part(i).data=data;
-    else
-        if i<3
-            error('Not suffient file parts found. _part-1.mat and/or _part-2.mat are missing')
-        end
-        i=11;
-    end
+% recording_part = struct();
+% i=0;
+% while i<10
+%     i=i+1;
+%     recording_name = [recording_basename num2str(i) '.mat'];
+%     if exist(recording_name,"file")
+%         load(recording_name, 'data')
+%         recording_part(i).data=data;
+%     else
+%         if i<3
+%             error('Not suffient file parts found. _part-1.mat and/or _part-2.mat are missing')
+%         end
+%         i=11;
+%     end
+% end
+
+% Extract directory and filename pattern
+[recPath, recFile, ~] = fileparts(recording_basename);
+
+% Extract the mod label (letters only) and run number
+tokens = regexp(recFile, '(.*_mod-)([A-Za-z]+)(\d*)_run-(\d+)_part-', 'tokens', 'once');
+if isempty(tokens)
+    error('Could not parse recording_basename: %s', recording_basename)
 end
+
+prefix      = tokens{1};   % everything before mod label
+modLabel    = tokens{2};   % e.g. "BrainSenseBip"
+runNumber   = tokens{4};   % e.g. "6"
+
+recording_part = struct();
+modNumbers = "";   % will accumulate digits from each part
+
+i = 1;
+while true
+    % Search for any file matching part i, regardless of mod-number
+    searchPattern = fullfile(recPath, sprintf('%s%s*_run-%s_part-%d.mat', ...
+        prefix, modLabel, runNumber, i));
+
+    files = dir(searchPattern);
+
+    if isempty(files)
+        if i == 1
+            error('Part 1 is missing — cannot stitch.')
+        elseif i == 2
+            error('Part 2 is missing — cannot stitch.')
+        else
+            break   % no more parts
+        end
+    end
+
+    % Load the part
+    load(fullfile(files(1).folder, files(1).name), 'data');
+    recording_part(i).data = data;
+
+    % Extract mod-number digits from this part
+    tok = regexp(files(1).name, ['_mod-' modLabel '(\d*)_'], 'tokens', 'once');
+    if isempty(tok)
+        error('Could not extract mod-number from %s', files(1).name)
+    end
+    modNumbers = modNumbers + string(tok{1});
+
+    i = i + 1;
+end
+
+% Build final filename
+finalName = sprintf('%s%s%s_run-%s.mat', ...
+    prefix, modLabel, modNumbers, runNumber);
+
+recording_finalname = fullfile(recPath, finalName);
 
 %assert the sample frequency is 250Hz
 assert(data.fsample==250)
 
-%compute sampleinfotime based on the time
+%compute sampleinfotime based on the old linear time
+prev_endtime = -inf;
+
 for i = 1:length(recording_part)
-    recording_part(i).data.sampleinfotime = [round(recording_part(i).data.time{1}(1)*recording_part(i).data.fsample) , round(recording_part(i).data.time{1}(end)*recording_part(i).data.fsample)];
+
+    begintime = seconds(timeofday(datetime( ...
+        recording_part(i).data.FirstPacketDateTime, ...
+        'InputFormat','yyyy-MM-dd HH:mm:ss.SSS')));
+
+    endtime = begintime + ...
+        length(recording_part(i).data.trial{1}) / recording_part(i).data.fsample;
+
+    % Assertion: ensure chronological order
+    assert(begintime > prev_endtime, ...
+        'Part "%s" begins at %.6f sec, but previous part ended at %.6f sec. Parts must be strictly sequential.', ...
+        recording_part(i).data.fname{1}, begintime, prev_endtime);
+
+    recording_part(i).data.sampleinfotime = [ ...
+        round(begintime * recording_part(i).data.fsample), ...
+        round(endtime   * recording_part(i).data.fsample)];
+
+    prev_endtime = endtime;
 end
+
+%for i = 1:length(recording_part)
+%    recording_part(i).data.sampleinfotime = [round(recording_part(i).data.time{1}(1)*recording_part(i).data.fsample) , round(recording_part(i).data.time{1}(end)*recording_part(i).data.fsample)];
+%end
 
 
 last_part = length(recording_part);
@@ -88,15 +165,32 @@ end
     for i=2:last_part
         data.trialinfo = [data.trialinfo; recording_part(i).data.trialinfo];
     end
-    
+
     for i = 1:last_part
         a=num2str(i);
-        assert(strcmp(strrep(recording_part(1).data.fname,'_part-1',''),strrep(recording_part(i).data.fname,['_part-' a],'')))
+        clean1 = regexprep(recording_part(1).data.fname, ...
+            {'_part-\d+', '(?<=_mod-[A-Za-z]+)\d+'}, ...
+            {'',          ''});
+
+        clean2 = regexprep(recording_part(i).data.fname, ...
+            {'_part-\d+', '(?<=_mod-[A-Za-z]+)\d+'}, ...
+            {'',          ''});
+
+        assert(strcmp(clean1, clean2), ...
+            sprintf(['Filename mismatch between part 1 and part %d.\n' ...
+            'Normalized part 1: %s\n' ...
+            'Normalized part %d: %s\n' ...
+            'These files cannot be stitched because their base identifiers differ.'], ...
+            i, clean1, i, clean2));
+
+
+        assert(strcmp(clean1, clean2));
         assert(strcmp(recording_part(i).data.fname(end-10:end), ['_part-' a '.mat']), ['The file name of recording ' a ' does not end on _part-' a ' in data.fname and/or .mat file'])
         assert(str2double(recording_part(1).data.fnamedate) <= str2double(recording_part(i).data.fnamedate)) %check for time line anachrony
     end
-    data.fname = {strrep(recording_part(1).data.fname,'_part-1','')};
-        
+    [~, fname, ext] = fileparts(recording_finalname);
+    data.fname = {[fname, ext]};
+    
     data.fnamedate = {recording_part(1).data.fnamedate};
     data.ecg_cleaned={[]};
     % if isfield(recording1,'ecg_cleaned') && isfield(recording2,'ecg_cleaned')
@@ -108,8 +202,9 @@ end
     % end
 
     if save_file
-        recording_basename = strrep(recording_basename, '_part-', '');
-        save(recording_basename,'data')
+        %recording_basename = strrep(recording_basename, '_part-', '');
+        fprintf('Saving stitched recording to:\n %s\n', recording_finalname);
+        save(recording_finalname,'data')
     end
 end
 
