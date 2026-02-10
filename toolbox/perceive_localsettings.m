@@ -1,4 +1,4 @@
-function localsettings = perceive_localsettings(localsettings_name)
+function config = perceive_localsettings(localsettings_name, config)
 % Load institution-specific localsettings from JSON files with validation.
 % Searches both the perceive toolbox config folder and all folders on the MATLAB path.
 %
@@ -16,7 +16,7 @@ function localsettings = perceive_localsettings(localsettings_name)
     % --- Special mode: list available institutions ---
     if strcmpi(localsettings_name,'list')
         [~, available, locations] = findPerceiveLocalsettingsFiles();
-        localsettings = struct('available', {available}, 'paths', {locations});
+        config = struct('available', {available}, 'paths', {locations});
         return;
     end
 
@@ -53,7 +53,7 @@ function localsettings = perceive_localsettings(localsettings_name)
     fclose(fid);
 
     try
-        data = jsondecode(raw);
+        config_js = jsondecode(raw);
     catch
         error('Invalid JSON format in file %s', fname);
     end
@@ -63,50 +63,63 @@ function localsettings = perceive_localsettings(localsettings_name)
                       'check_gui_tasks','check_gui_med','convert2bids','datafields'};
     for k = 1:numel(requiredFields)
         f = requiredFields{k};
-        if ~isfield(data,f)
+        if ~isfield(config_js,f)
             error('Missing required field "%s" in %s', f, fname);
         end
     end
 
+    % --- Handle optional field: devmode ---
+    if isfield(config_js, 'devmode')
+        % ensure it is logical true/false
+        if ~islogical(config_js.devmode) || numel(config_js.devmode) ~= 1
+            error('Field "devmode" in %s must be a logical true/false value.', fname);
+        end
+    else
+        % if missing, set default
+        config_js.devmode = false;
+    end
+
     % --- Validate content types ---
-    if ~iscell(data.taskItems) || ~all(cellfun(@ischar,data.taskItems))
+    if ~iscell(config_js.taskItems) || ~all(cellfun(@ischar,config_js.taskItems))
         error('Field "taskItems" must be a cell array of strings in %s', fname);
     end
-    if ~iscell(data.stimItems) || ~all(cellfun(@ischar,data.stimItems))
+    if ~iscell(config_js.stimItems) || ~all(cellfun(@ischar,config_js.stimItems))
         error('Field "stimItems" must be a cell array of strings in %s', fname);
     end
-    if ~islogical(data.check_followup_time) || ~isscalar(data.check_followup_time)
+    if ~islogical(config_js.check_followup_time) || ~isscalar(config_js.check_followup_time)
         error('Field "check_followup_time" must be a logical scalar in %s', fname);
     end
-    if ~islogical(data.check_gui_tasks) || ~isscalar(data.check_gui_tasks)
+    if ~islogical(config_js.check_gui_tasks) || ~isscalar(config_js.check_gui_tasks)
         error('Field "check_gui_tasks" must be a logical scalar in %s', fname);
     end
-    if ~islogical(data.check_gui_med) || ~isscalar(data.check_gui_med)
+    if ~islogical(config_js.check_gui_med) || ~isscalar(config_js.check_gui_med)
         error('Field "check_gui_med" must be a logical scalar in %s', fname);
     end
-    if ~islogical(data.convert2bids) || ~isscalar(data.convert2bids)
+    if ~islogical(config_js.convert2bids) || ~isscalar(config_js.convert2bids)
         error('Field "convert2bids" must be a logical scalar in %s', fname);
     end
-    if ~iscell(data.datafields) || ~all(cellfun(@ischar,data.datafields))
+    if ~iscell(config_js.datafields) || ~all(cellfun(@ischar,config_js.datafields))
         error('Field "datafields" must be a cell array of strings in %s', fname);
     end
 
     % --- Cross-field validation: BrainSense pairing ---
-    hasTimeDomain = any(strcmpi(data.datafields,'BrainSenseTimeDomain'));
-    hasLfp        = any(strcmpi(data.datafields,'BrainSenseLfp'));
+    hasTimeDomain = any(strcmpi(config_js.datafields,'BrainSenseTimeDomain'));
+    hasLfp        = any(strcmpi(config_js.datafields,'BrainSenseLfp'));
     if xor(hasTimeDomain, hasLfp)
         error(['Invalid datafields in %s: "BrainSenseTimeDomain" and "BrainSenseLfp" must either both be present or both absent.'], fname);
     end
 
     % --- Normalize outputs for consistency ---
-    localsettings.name                = institution;
-    localsettings.taskItems           = data.taskItems(:)';    % row cellstr
-    localsettings.stimItems           = data.stimItems(:)';    % row cellstr
-    localsettings.check_followup_time = logical(data.check_followup_time);
-    localsettings.check_gui_tasks     = logical(data.check_gui_tasks);
-    localsettings.check_gui_med       = logical(data.check_gui_med);
-    localsettings.convert2bids        = logical(data.convert2bids);
-    localsettings.datafields          = data.datafields(:)';   % row cellstr
+    config.name                = institution;
+    config.taskItems           = config_js.taskItems(:)';    % row cellstr
+    config.stimItems           = config_js.stimItems(:)';    % row cellstr
+    config.check_followup_time = logical(config_js.check_followup_time);
+    config.check_gui_tasks     = logical(config_js.check_gui_tasks);
+    config.check_gui_med       = logical(config_js.check_gui_med);
+    config.convert2bids        = logical(config_js.convert2bids);
+    config.datafields          = config_js.datafields(:)';   % row cellstr
+    % add normalized devmode (optional field)
+    config.devmode = logical(config_js.devmode);
 end
 
 % ------------------------------------------------------------
