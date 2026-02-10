@@ -44,17 +44,26 @@ for a=1:length(files)
     end
     raw(isnan(raw))=0;
     figure('Units','centimeters','PaperUnits','centimeters','Position',[1 1 40 20])
+
+    defaultBlue = [0 0.4470 0.7410]; % MATLAB default blue
+
     for b = 1:size(raw,1)
-        p(b)=plot(time,zscore(raw(b,:)')'./10+b);
+        p(b) = plot(time, zscore(raw(b,:)')'./10 + b, 'Color', defaultBlue);
         hold on
     end
-    set(gca,'YTick',[1:size(raw,1)],'YTickLabel',strrep(chanlabels,'_',' '),'YTickLabelRotation',45);
+
+    set(gca, 'YTick', 1:size(raw,1), ...
+        'YTickLabel', strrep(chanlabels, '_', ' '), ...
+        'YTickLabelRotation', 45);
+
     xlabel('Time')
     ylabel('Amplitude')
-    if length(time)>1
+
+    if length(time) > 1
         xlim([time(1) time(end)]);
     end
-    ylim([0 length(chanlabels)+1]);
-    title(strrep(fname,'_',' '))
-    
+    ylim([0 length(chanlabels) + 1]);
+
+    title(regexprep(fname, '_', '\\_'))
+
 end
