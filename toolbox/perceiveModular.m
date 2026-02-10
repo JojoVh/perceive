@@ -11,7 +11,7 @@ arguments
     % files e.g. ["", 'Report_Json_Session_Report_20200115T123657.json', {'Report_Json_Session_Report_20200115T123657.json','Report_Json_Session_Report_20200115T123658.json'}]
     % use e.g. perceive('Report_Json_Session_Report_20200115T123657.json')
     %
-    % All input is optional, you can specify files as cell or character array 
+    % All input is optional, you can specify files as cell or character array
     % if files isn't specified or remains empty, it will automatically include all files in the current working directory
     % if no files in the current working directory are found, a you can choose files via the MATLAB uigetdir window.
 
@@ -20,21 +20,21 @@ arguments
     % input e.g. ["", 7, 21 , "021", ... ]
     % use  e.g. perceive('Report_Json_Session_Report_20200115T123657.json','Charite_sub-001')
     % you can specify a subject ID for each file in case you want to follow an IRB approved naming scheme for file export
-    % 
+    %
     % if unspecified or left empy, the subjectID will be created from:
     % ImplantDate, first letter of disease type and target (e.g. sub-2020110DGpi)
 
     sesMedOffOn01 {mustBeMember(sesMedOffOn01,["","MedOff","MedOn","MedDaily","MedOff01","MedOn01","MedOff02","MedOn02","MedOff03","MedOn03","MedOffOn01","MedOffOn02","MedOffOn03","MedOnPostOpIPG","MedOffPostOpIPG","Unknown", "PostOp"])} = '';
     % session:
     % input e.g. ["","MedOff","MedOn","MedDaily","MedOff01","MedOn01"]
-    % 
+    %
 
     extended {mustBeMember(extended,["","yes"])} = '';
     % '' means not extended, 'yes' means extended (default no)
     % gives an extensive output of chronic, calibration, lastsignalcheck, diagnostic, impedance and snapshot data
 
     gui {mustBeMember(gui,["","yes"])} = '';
-    % '' means no gui, 'yes' means gui (default yes)
+    % '' means no gui, 'yes' means gui (default no)
 
     localsettings_name  ='';
     % default is '', which is default
@@ -45,7 +45,7 @@ arguments
     % perceive_localsettings_duesseldorf.json
     % perceive_localsettings_wuerzburg.json
     % perceive_localsettings_"custom name".json with custom name to be
-    % filled in, together with custom settings. Needs to be in matlab path, needs start with perceive_localsettings_*json, but does not need to be in the perceive\toolbox\config folder  
+    % filled in, together with custom settings. Needs to be in matlab path, needs start with perceive_localsettings_*json, but does not need to be in the perceive\toolbox\config folder
     % possible datafields from Medtronic Percept are  ["","BrainSenseLfp","BrainSenseSurvey","BrainSenseTimeDomain","CalibrationTests","DiagnosticData","EventSummary","Impedance","IndefiniteStreaming","LfpMontageTimeDomain","MostRecentInSessionSignalCheck","PatientEvents"])} ='';
 
 end
@@ -69,9 +69,9 @@ end
 % BrainSenseBip = combination of BSL and BSTD into Brainsense with LFP signal/stim settings.
 
 % %task = 'TASK'; %All types of tasks: Rest, RestTap, FingerTapL, FingerTapR, UPDRS, MovArtArms,MovArtStand,MovArtHead,MovArtWalk or any tasks added over the GUI or over the \toolbox\config\perceive_localsettings_"custom name".json
-    %acq = ''; %StimOff, StimOnL, StimOnR, StimOnB, Burst
-    %mod = ''; %BrainSense, IS, LMTD, Chronic + Bip Ring RingL RingR SegmIntraL SegmInterL SegmIntraR SegmInterR
-    %run = ''; %numeric
+%acq = ''; %StimOff, StimOnL, StimOnR, StimOnB, Burst
+%mod = ''; %BrainSense, IS, LMTD, Chronic + Bip Ring RingL RingR SegmIntraL SegmInterL SegmIntraR SegmInterR
+%run = ''; %numeric
 
 %% references
 % for modalities see white paper: https://www.medtronic.com/content/dam/medtronic-wide/public/western-europe/products/neurological/percept-pc-neurostimulator-whitepaper.pdf
@@ -101,11 +101,12 @@ gui           = config.gui;
 task          = config.task;
 acq           = config.acq;
 mod           = config.mod;
+mod_elementnr = '';             %for this modality, which element number according to JavaScript in the js does current recording have?
 run           = config.run;
 
 %% set local settings
-localsettings=perceive_localsettings(localsettings_name);
-datafields=localsettings.datafields;
+config=perceive_localsettings(localsettings_name, config);
+datafields=config.datafields;
 %% set global settings
 set(0,'DefaultFigureWindowStyle','normal') %prevents that figures are "docked" or "modal" as in live scripts
 app.saveandexitButton.UserData = true; %prevents that the previous perceive GUI freezes
@@ -132,9 +133,12 @@ for idxFile = 1:length(files)
 
     % create metatable %determine
     MetaT = cell2table(cell(0,10),'VariableNames', {'report','perceiveFilename','session','condition','task','contacts','run','part','acq','remove'});
-    
+
     alldata = {};
     disp(['SUBJECT ' hdr.subject])
+
+    % rest some variables each for loop iterating over different json files
+    % need to check which
 
     for idxDatafield = 1:length(datafields)
 
@@ -146,9 +150,9 @@ for idxFile = 1:length(files)
                 continue
             end
 
+            %reset each loop the mod and the run nr
             mod='';
             run=1;
-            counterBSL=0;
 
             % go through different datafields; extract and plot data
             switch datafields{idxDatafield}
@@ -202,11 +206,11 @@ for idxFile = 1:length(files)
                         if isfield(data, 'LfpFrequencySnapshotEvents')
 
                             alldata_diag_lfpsnap = perceive_extract_diagnostic_lfpsnapshot(data.LfpFrequencySnapshotEvents, hdr);
-                            
+
                             % nothing is appended to alldata in current version
                             % maybe for future: append to alldata container
                             % alldata = [alldata, alldata_diag_lfpsnap];
- 
+
                             % plot every snapshot
                             if config.extended
                                 for idxSnapshot = 1:length(alldata_diag_lfpsnap)
@@ -215,7 +219,7 @@ for idxFile = 1:length(files)
                             end
 
                         end
-                      
+
                     end
 
                 case 'BrainSenseTimeDomain'
@@ -224,8 +228,8 @@ for idxFile = 1:length(files)
                     alldata = [alldata, alldata_bstd];
 
                 case 'BrainSenseLfp'
-                    
-                    [alldata_bsl, ~] = perceive_extract_bsl(data, hdr);
+
+                    [alldata_bsl, list_of_BSL] = perceive_extract_bsl(data, hdr);
                     alldata = [alldata, alldata_bsl];
 
                     % loop over bsl files
@@ -253,261 +257,140 @@ for idxFile = 1:length(files)
 
                 case 'IndefiniteStreaming'
 
-                    clear TicksInMses
-                    FirstPacketDateTime = strrep(strrep({data(:).FirstPacketDateTime},'T',' '),'Z','');
-                    runs = unique(FirstPacketDateTime);
-                    fsample = data.SampleRateInHz;
+                    alldata_is = perceive_extract_indefinitestreaming(data, hdr, config);
+                    alldata = [alldata, alldata_is];
 
-                    Pass = {data(:).Pass};
-                    tmp =  {data(:).GlobalSequences};
-                    for c = 1:length(tmp) %missing
-                        GlobalSequences{c,:} = str2num(tmp{c});
-                        missingPackages{c,:} = (diff(str2num(tmp{c}))==2); 
-                        nummissinPackages(c) = numel(find(diff(str2num(tmp{c}))==2));
-                    end
-                    tmp =  {data(:).TicksInMses};
-                    for c = 1:length(tmp)
-                        TicksInMses{c,:}          = str2num(tmp{c});
-                        TicksInS_temp             = (TicksInMses{c,:} - TicksInMses{c,:}(1))/1000;
-                        [TicksInS_temp,~,ci_temp] = unique(TicksInS_temp);
-                        TicksInS{c,:}             = TicksInS_temp;
-                        ci{c,:}                   = ci_temp;
-                    end
 
-                    tmp =  {data(:).GlobalPacketSizes};
-                    for c = 1:length(tmp) %missing
-                        GlobalPacketSizes_temp = str2num(tmp{c});
-                        for kk=1:max(ci{c,:})
-                            GPS_temp(kk)=sum(GlobalPacketSizes_temp(find(ci{c,:}==kk)));
-                        end
-                        GlobalPacketSizes{c,:} = GPS_temp;
-                        isDataMissing(c)       = logical(TicksInS{c,:}(end) >= sum(GlobalPacketSizes{c,:})/fsample);
-                        time_real{c,:}         = TicksInS{c,:}(1):1/fsample:TicksInS{c,:}(end)+(GlobalPacketSizes{c,:}(end)-1)/fsample;
-                        time_real{c,:}         = round(time_real{c,:},3);
-                    end
-
-                    gain=[data(:).Gain]';
-                    [tmp1,tmp2] = strtok(strrep({data(:).Channel}','_AND',''),'_');
-                    ch1 = strrep(strrep(strrep(strrep(tmp1,'ZERO','0'),'ONE','1'),'TWO','2'),'THREE','3');
-
-                    [tmp1,tmp2] = strtok(tmp2,'_');
-                    ch2 = strrep(strrep(strrep(strrep(tmp1,'ZERO','0'),'ONE','1'),'TWO','2'),'THREE','3');
-                    side = strrep(strrep(strtok(tmp2,'_'),'LEFT','L'),'RIGHT','R');
-                    Channel = strcat(hdr.chan,'_',side,'_', ch1, ch2);
-                    d=[];
-                    for c = 1:length(runs)
-                        i=perceive_ci(runs{c},FirstPacketDateTime);
-                        d=[];
-                        d.hdr = hdr;
-                        d.datatype = datafields{idxDatafield};
-                        d.hdr.IS.Pass=strrep(strrep(unique(strtok(Pass(i),'_')),'FIRST','1'),'SECOND','2');
-                        d.hdr.IS.GlobalSequences=GlobalSequences(i,:);
-                        d.hdr.IS.GlobalPacketSizes=GlobalPacketSizes(i,:);
-                        d.hdr.IS.FirstPacketDateTime = runs{c};
-                        x=find(ismember(i, find(isDataMissing)));
-                        if ~isempty(x)
-                            warning('missing packages detected, will interpolate to replace missing data') %missing
-                            try
-                                for k=1:numel(x)
-                                    isReceived = zeros(size(time_real{i(k),:}, 2), 1);
-                                    nPackets = numel(GlobalPacketSizes{i(k),:});
-                                    for packetId = 1:nPackets
-                                        timeTicksDistance = abs(time_real{i(k),:} - TicksInS{i(k),:}(packetId));
-                                        [~, packetIdx] = min(timeTicksDistance);
-                                        if isReceived(packetIdx) == 1
-                                            packetIdx = packetIdx +1;
-                                        end
-                                        %                                     if packetIdx+GlobalPacketSizes{i(k),:}(packetId)-1>size(isReceived,1)
-                                        %                                         cut_sampl=size(isReceived,1)-packetIdx+GlobalPacketSizes{i(k),:}(packetId);
-                                        %                                         isReceived(packetIdx:packetIdx+GlobalPacketSizes{i(k),:}(packetId)-cut_sampl) = isReceived(packetIdx:packetIdx+GlobalPacketSizes{i(k),:}(packetId)-cut_sampl)+1;
-                                        %                                     else
-                                        isReceived(packetIdx:packetIdx+GlobalPacketSizes{i(k),:}(packetId)-1) = isReceived(packetIdx:packetIdx+GlobalPacketSizes{i(k),:}(packetId)-1)+1;
-                                        %             figure; plot(isReceived, '.'); yticks([0 1]); yticklabels({'not received', 'received'}); ylim([-1 10])
-                                        %                                     end
-                                    end
-
-                                    %If there are pseudo double-received samples, compensate non-received samples
-                                    %                                 numel(find(logical(isReceived)))+nDoubles
-                                    doublesIdx = find(isReceived == 2);
-                                    nDoubles = numel(doublesIdx);
-                                    for doubleId = 1:nDoubles
-                                        missingIdx = find(isReceived == 0);
-                                        [~, idxOfidx] = min(abs(missingIdx - doublesIdx(doubleId)));
-                                        isReceived(missingIdx(idxOfidx)) = 1;
-                                        isReceived(doublesIdx(doubleId)) = 1;
-                                    end
-
-                                    data_temp = NaN(size(time_real{i(k),:}, 2), 1);
-                                    data_temp(logical(isReceived), :) = data(i(k)).TimeDomainData;
-                                    ind_interp=find(diff(isReceived));
-                                    if isReceived(ind_interp(1)+1)==1
-                                        ind_interp=[1 ind_interp];
-                                        data_temp(1)=0;
-                                    end
-                                    if isReceived(ind_interp(end)+1)==0
-                                        ind_interp=[ind_interp size(data_temp,1)-1];
-                                        data_temp(end)=0;
-                                    end
-                                    for mm=1:2:numel(ind_interp/2)
-                                        data_temp(ind_interp(mm)+1:ind_interp(mm+1))=...
-                                            linspace(data_temp(ind_interp(mm)), data_temp(ind_interp(mm+1)+1), ind_interp(mm+1)-ind_interp(mm));
-                                    end
-                                    raw_temp(x(k),:)=data_temp';
-                                end
-                                tmp=raw_temp;
-                            catch
-                                warning('The missing packages could not be computed. Interpolation failed.') %missing
-                            end
-                        else
-                            tmp=[data(i).TimeDomainData]';
-                        end
-
-                        try
-                            xchans = perceive_ci({'L_03','L_13','L_02','R_03','R_13','R_02'},Channel(i));
-                            nchans = {'L_01','L_12','L_23','R_01','R_12','R_23'};
-                            refraw = [tmp(xchans(1),:)-tmp(xchans(2),:);(tmp(xchans(1),:)-tmp(xchans(2),:))-tmp(xchans(3),:);tmp(xchans(3),:)-tmp(xchans(1),:);
-                                tmp(xchans(4),:)-tmp(xchans(5),:);(tmp(xchans(4),:)-tmp(xchans(5),:))-tmp(xchans(6),:);tmp(xchans(6),:)-tmp(xchans(4),:)];
-                            d.trial{1} = [tmp;-refraw;];
-                        catch
-                            d.trial{1} = [tmp];
-                            warning('The calculated packages could not be added. Data for Indefinite Streaming failed.')
-                        end
-
-                        d.label=[Channel(i);strcat(hdr.chan,'_',nchans')];
-
-                        d.time{1} = linspace(seconds(datetime(runs{c},'Inputformat','yyyy-MM-dd HH:mm:ss.SSS')-hdr.d0),seconds(datetime(runs{c},'Inputformat','yyyy-MM-dd HH:mm:ss.SSS')-hdr.d0)+size(d.trial{1},2)/fsample,size(d.trial{1},2));
-                        d.fsample = fsample;
-                        %firstsample = 1+round(fsample*seconds(datetime(runs{c},'Inputformat','yyyy-MM-dd HH:mm:ss.SSS')-datetime(FirstPacketDateTime{1},'Inputformat','yyyy-MM-dd HH:mm:ss.SSS')));
-                        firstsample = set_firstsample(data(c).TicksInMses);
-                        lastsample = firstsample+size(d.trial{1},2);
-                        d.sampleinfo(1,:) = [firstsample lastsample];
-                        d.trialinfo(1) = c;
-                        d.hdr.label=d.label;
-                        d.hdr.Fs = d.fsample;
-                        mod = 'mod-ISRing';
-                        d.fname = [hdr.fname '_' mod];
-                        d.fnamedate = [char(datetime(runs{c},'Inputformat','yyyy-MM-dd HH:mm:ss.SSS','format','yyyyMMddhhmmss'))];
-                        % TODO: set if needed:
-                        %d.keepfig = false; % do not keep figure with this signal open
-                        if config.ecg_cleaning
-                            d=call_ecg_cleaning(d,hdr,d.trial{1});
-                        end
-                        alldata{length(alldata)+1} = d;
-                    end
 
                 case 'CalibrationTests'
 
                     if extended
-                       alldata_ct = perceive_extract_calibrationtests(data, hdr);
-                       alldata = [alldata, alldata_ct];
+                        alldata_ct = perceive_extract_calibrationtests(data, hdr);
+                        alldata = [alldata, alldata_ct];
                     end
 
                 case 'SenseChannelTests'
 
                     if extended
-                        FirstPacketDateTime = strrep(strrep({data(:).FirstPacketDateTime},'T',' '),'Z','');
-                        runs = unique(FirstPacketDateTime);
-                        hdr.scd0=datetime(FirstPacketDateTime{1}(1:10));
-                        Pass = {data(:).Pass};
-                        tmp =  {data(:).GlobalSequences};
-                        for c = 1:length(tmp)
-                            GlobalSequences{c,:} = str2num(tmp{c});
-                        end
-                        tmp =  {data(:).GlobalPacketSizes};
-                        for c = 1:length(tmp)
-                            GlobalPacketSizes{c,:} = str2num(tmp{c});
-                        end
-                        raw = [data(:).TimeDomainData]';
-                        fsample = data.SampleRateInHz;
-                        gain=[data(:).Gain]';
-                        [tmp1,tmp2] = strtok(strrep({data(:).Channel}','_AND',''),'_');
-                        ch1 = strrep(strrep(strrep(strrep(tmp1,'ZERO','0'),'ONE','1'),'TWO','2'),'THREE','3');
-
-                        [tmp1,tmp2] = strtok(tmp2,'_');
-                        ch2 = strrep(strrep(strrep(strrep(tmp1,'ZERO','0'),'ONE','1'),'TWO','2'),'THREE','3');
-                        side = strrep(strrep(strtok(tmp2,'_'),'LEFT','L'),'RIGHT','R');
-                        Channel = strcat(hdr.chan,'_',side,'_', ch1, ch2);
-                        for c = 1:length(runs)
-                            i=perceive_ci(runs{c},FirstPacketDateTime);
-                            d=[];
-                            d.hdr = hdr;
-                            d.datatype = datafields{idxDatafield};
-                            d.hdr.IS.Pass=strrep(strrep(unique(strtok(Pass(i),'_')),'FIRST','1'),'SECOND','2');
-                            d.hdr.IS.GlobalSequences=GlobalSequences(i,:);
-                            d.hdr.IS.GlobalPacketSizes=GlobalPacketSizes(i,:);
-                            d.hdr.IS.FirstPacketDateTime = runs{c};
-                            tmp = raw(i,:);
-                            d.trial{1} = [tmp];
-                            d.label=Channel(i);
-
-                            d.time{1} = linspace(seconds(datetime(runs{c},'Inputformat','yyyy-MM-dd HH:mm:ss.SSS')-hdr.scd0),seconds(datetime(runs{c},'Inputformat','yyyy-MM-dd HH:mm:ss.SSS')-hdr.scd0)+size(d.trial{1},2)/fsample,size(d.trial{1},2));
-                            d.fsample = fsample;
-                            %firstsample = 1+round(fsample*seconds(datetime(runs{c},'Inputformat','yyyy-MM-dd HH:mm:ss.SSS')-datetime(FirstPacketDateTime{1},'Inputformat','yyyy-MM-dd HH:mm:ss.SSS')));
-                            firstsample = set_firstsample(data(c).TicksInMses);
-                            lastsample = firstsample+size(d.trial{1},2);
-                            d.sampleinfo(1,:) = [firstsample lastsample];
-                            d.trialinfo(1) = c;
-
-                            d.hdr.label = d.label;
-                            d.hdr.Fs = d.fsample;
-                            d.fname = [hdr.fname '_run-SCT' char(datetime(runs{c},'Inputformat','yyyy-MM-dd HH:mm:ss.SSS','format','yyyyMMddhhmmss'))];
-                            % TODO: set if needed:
-                            %d.keepfig = false; % do not keep figure with this signal open
-                            alldata{length(alldata)+1} = d;
-                        end
+                        alldata_sct = perceive_extract_sensechanneltests(data, hdr, config);
+                        alldata = [alldata, alldata_ct];
                     end
             end
         end
     end
 
+
     %nfile = fullfile(hdr.fpath,[hdr.fname '.jsoncopy']);
     %copyfile(files{a},nfile)
 
     %% count BrainSense files
-    counterBrainSense=0;
+    %counterBrainSense=0;
     % check counterBSL
-    counterBSL=0;
-    for idxDatafield = 1:length(alldata)
-        if(contains(alldata{idxDatafield}.fname,'BSL'))
-            counterBSL=counterBSL+1;
-        end
-    end
+    % counterBSL=0;
+    % for idxDatafield = 1:length(alldata)
+    %     if(contains(alldata{idxDatafield}.fname,'BSL'))
+    %         counterBSL=counterBSL+1;
+    %     end
+    % end
     %% save all data
     for idxDatafield = 1:length(alldata)
-        fullname = fullfile('.',hdr.fpath,alldata{idxDatafield}.fname);
         data=alldata{idxDatafield};
+        fprintf('Currently processing: %s\n', data.fname);
+        fullname = fullfile('.',hdr.fpath,data.fname);
+        % create assertions about fullname
+        check_fullname(fullname)
         % remove the optional 'keepfig' field (not to mess up the saved data)
         if isfield(data,'keepfig')
             data=rmfield(data,'keepfig');
         end
 
         % restore the data (incl. the optional 'keepfig' field)
-        data=alldata{idxDatafield};
+        %data=alldata{idxDatafield};
 
         %% handle BSTD and BSL files to BrainSenseBip
         if any(regexp(data.fname,'BSTD'))
-            assert(counterBrainSense<=counterBSL, 'BrainSense could not be matched with BSL')
-            counterBrainSense=counterBrainSense+1;
+            %assert(counterBrainSense<=counterBSL, 'BrainSense could not be matched with BSL')
+            %counterBrainSense=counterBrainSense+1;
 
+            % save BSTD file separately
+            run = 1;
+
+            % Split fullname into folder + base + ext
+            [folder, base, ext] = fileparts(fullname);
+
+            % Construct first candidate: base_run-1.mat
+            candidate = fullfile(folder, sprintf('%s_run-%d', base, run));
+
+            % Increase run number until filename is unused
+            while isfile([candidate '.mat'])
+                run = run + 1;
+                candidate = fullfile(folder, sprintf('%s_run-%d', base, run));
+            end
+
+            % Update fullname to the final chosen name
+            fullname = candidate;
+
+            % Update data.fname to match
+            [~, fname] = fileparts(fullname);
+            data.fname = [fname '.mat'];
+
+            disp(['WRITING ' fullname '.mat as FieldTrip file.'])
+            save([fullname '.mat'], 'data');
+
+            %
             data.fname = strrep(data.fname,'BSTD','BrainSenseBip');
-            data.fname = strrep(data.fname,'task-Rest',['task-TASK' num2str(counterBrainSense)]);
-            fulldata = data;
+            data.fname = strrep(data.fname,'task-Rest','task-TASK');
+            %data.fname = strrep(data.fname,'task-Rest',['task-TASK' num2str(counterBrainSense)]);
+            fulldata = data; %need to replace fulldata to just data, in separate function
 
-            [folder,~,~] = fileparts(fullname);
-            pattern = fullfile(folder, '*BSL*.mat');
-            [~,~,list_of_BSLfiles] = perceive_ffind(pattern);
+            %[folder,~,~] = fileparts(fullname);
+            %pattern = fullfile(folder, '*BSL*.mat');
+            %[~,~,list_of_BSLfiles] = perceive_ffind(pattern); %this needs to change, it should not search for the BSL, but know which one were written. Risk on taking to many BSL files from previous runs.
 
-            if ~isempty(list_of_BSLfiles)
-                bsl=load(list_of_BSLfiles{counterBrainSense});
+            if ~isempty(list_of_BSL)
 
-                if ~isequal(bsl.data.hdr.SessionEndDate, data.hdr.SessionEndDate)
+                %% search for the matching BSL file
+                found = false;
+
+                for i = 1:length(alldata)
+
+                    bsl = alldata{i};
+
+                    % --- Check SessionEndDate match ---
+                    if ~isequal(bsl.hdr.OriginalFile, fulldata.hdr.OriginalFile)
+                        continue
+                    end
+
+                    % --- Check FirstPackageDateTime within 1.501 seconds ---
+                    t1 = datetime(bsl.FirstPacketDateTime, 'InputFormat','yyyy-MM-dd HH:mm:ss.SSS');
+                    t2 = datetime(fulldata.FirstPacketDateTime, 'InputFormat','yyyy-MM-dd HH:mm:ss.SSS');
+
+                    if abs(seconds(t1 - t2)) <= 1.501
+                        % Bingo!
+                        found = true;
+                        break
+                    end
+
+                end
+
+                % --- If no match found, throw error ---
+                if ~found
                     warning('BSL file could not be matched BSTD data to create BrainSense.')
+                    error('No matching BSL could be found: same json file name but no FirstPackageDateTime within 1 second.');
                 else
+                    bsl.data = bsl; %change this later
+
+                    %bsl=load(list_of_BSLfiles{counterBrainSense});
+
+                    %if ~isequal(bsl.data.hdr.SessionEndDate, data.hdr.SessionEndDate)
+
+                    %else
                     fulldata.BSLDateTime = [bsl.data.realtime(1) bsl.data.realtime(end)];
 
                     fulldata.label(3:6) = bsl.data.label;
-                    fulldata.time{1}=fulldata.time{1};
+                    fulldata.time{1}=fulldata.timeInSecDerivedFromTicks{1}; %the fulldate.time comes from perceive_extract_bstd d.time{1} = linspace(rel_start, rel_start + size(d.trial{1}, 2)/fsample, size(d.trial{1}, 2));
                     otime = bsl.data.time{1};
+                    %% CRUCIAL PART where BSL is being added to fulldata of BSTD
                     for c =1:4
                         fulldata.trial{1}(c+2,:) = interp1(otime-otime(1),bsl.data.trial{1}(c,:),fulldata.time{1}-fulldata.time{1}(1),'nearest');
                     end
@@ -523,102 +406,102 @@ for idxFile = 1:length(files)
                     fulldata.fname = strrep(fulldata.fname,'StimOff',acq);
                     %user = memory; user.MemUsedMATLAB < 9^100 %corresponds with 9MB
                     if extended
-
+                        perceive_plot_brainsensebip(fulldata, bsl, hdr)
                         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-                        if size(fulldata.trial{1},2) > 250*20  %% code edited by Mansoureh Fahimi (changed 250 to 250*20)
-                            figure('Units','centimeters','PaperUnits','centimeters','Position',[1 1 40 20])
-                            subplot(2,2,1)
-                            yyaxis left
-                            plot(fulldata.time{1},fulldata.trial{1}(1,:))
-                            ylabel('Raw amplitude')
-                            if isfield(bsl.data.hdr.BSL.TherapySnapshot,'Left')
-                                pkfreq = bsl.data.hdr.BSL.TherapySnapshot.Left.FrequencyInHertz;
-                                pkfreq = bsl.data.hdr.BSL.TherapySnapshot.Left.FrequencyInHertz;
-                            elseif isfield(bsl.data.hdr.BSL.TherapySnapshot,'Right')
-                                pkfreq = bsl.data.hdr.BSL.TherapySnapshot.Right.FrequencyInHertz;
-                            else
-                                error('neither Left nor Right TherapySnapshot present');
-                            end
-                            hold on
-
-                            [tf,t,f]=perceive_raw_tf(fulldata.trial{1}(1,:),fulldata.fsample,128,.3);
-                            mpow=nanmean(tf(perceive_sc(f,pkfreq-4):perceive_sc(f,pkfreq+4),:));
-                            yyaxis right
-                            ylabel('LFP and STIM amplitude')
-                            plot(fulldata.time{1},fulldata.trial{1}(3,:))
-                            %LAmp = fulldata.trial{1}(3,:);
-                            xlim([fulldata.time{1}(1),fulldata.time{1}(end)])
-                            hold on
-                            plot(fulldata.time{1},fulldata.trial{1}(5,:).*1000)
-                            plot(t,mpow.*1000)
-                            title(strrep({fulldata.label{3},fulldata.label{5}},'_',' '))
-                            axes('Position',[.34 .8 .1 .1])
-                            box off
-                            plot(f,nanmean(log(tf),2))
-                            xlabel('F')
-                            ylabel('P')
-                            xlim([3 40])
-
-                            axes('Position',[.16 .8 .1 .1])
-                            box off
-                            plot(fulldata.time{1},fulldata.trial{1}(1,:))
-                            xlabel('T'),ylabel('A')
-                            xx = randi(round([fulldata.time{1}(1),fulldata.time{1}(end)]),1);
-                            xlim([xx xx+1.5])
-
-                            subplot(2,2,3)
-                            imagesc(t,f,log(tf)),axis xy,
-                            xlabel('Time [s]')
-                            ylabel('Frequency [Hz]')
-
-                            subplot(2,2,2)
-                            yyaxis left
-                            plot(fulldata.time{1},fulldata.trial{1}(2,:))
-                            ylabel('Raw amplitude')
-                            if isfield(bsl.data.hdr.BSL.TherapySnapshot,'Right')
-                                pkfreq = bsl.data.hdr.BSL.TherapySnapshot.Right.FrequencyInHertz;
-                            elseif isfield(bsl.data.hdr.BSL.TherapySnapshot,'Left')
-                                pkfreq = bsl.data.hdr.BSL.TherapySnapshot.Left.FrequencyInHertz;
-                            else
-                                error('neither Left nor Right TherapySnapshot present');
-                            end
-                            hold on
-                            [tf,t,f]=perceive_raw_tf(fulldata.trial{1}(2,:),fulldata.fsample,fulldata.fsample,.5);
-                            mpow=nanmean(tf(perceive_sc(f,pkfreq-4):perceive_sc(f,pkfreq+4),:));
-                            yyaxis right
-                            ylabel('LFP and STIM amplitude')
-                            plot(fulldata.time{1},fulldata.trial{1}(4,:))
-                            %RAmp = fulldata.trial{1}(4,:);
-                            xlim([fulldata.time{1}(1),fulldata.time{1}(end)])
-                            hold on
-                            plot(fulldata.time{1},fulldata.trial{1}(6,:).*1000)
-                            plot(t,mpow.*1000)
-
-                            title(strrep({fulldata.fname,fulldata.label{4},fulldata.label{6}},'_',' '))
-                            %%
-                            axes('Position',[.78 .8 .1 .1])
-                            box off
-                            plot(f,nanmean(log(tf),2))
-                            xlim([3 40])
-                            xlabel('F')
-                            ylabel('P')
-
-                            axes('Position',[.6 .8 .1 .1])
-                            box off
-                            plot(fulldata.time{1},fulldata.trial{1}(2,:))
-                            xlabel('T'),ylabel('A')
-                            xlim([xx xx+1.5])
-
-                            subplot(2,2,4)
-                            imagesc(t,f,log(tf)),axis xy,
-                            xlabel('Time [s]')
-                            ylabel('Frequency [Hz]')
-
-                            perceive_print(fullfile('.',hdr.fpath, fulldata.fname))
-                        else
-                            disp('The recording was less than 20 seconds. There is a potential problem: a figure got not created, but the code below would print the current figure (which holds something else than the current ''data'')!');
-                            disp('Please, review it when missing.');
-                        end
+                        % if size(fulldata.trial{1},2) > 250*20  %% code edited by Mansoureh Fahimi (changed 250 to 250*20)
+                        %     figure('Units','centimeters','PaperUnits','centimeters','Position',[1 1 40 20])
+                        %     subplot(2,2,1)
+                        %     yyaxis left
+                        %     plot(fulldata.time{1},fulldata.trial{1}(1,:))
+                        %     ylabel('Raw amplitude')
+                        %     if isfield(bsl.data.hdr.BSL.TherapySnapshot,'Left')
+                        %         pkfreq = bsl.data.hdr.BSL.TherapySnapshot.Left.FrequencyInHertz;
+                        %         pkfreq = bsl.data.hdr.BSL.TherapySnapshot.Left.FrequencyInHertz;
+                        %     elseif isfield(bsl.data.hdr.BSL.TherapySnapshot,'Right')
+                        %         pkfreq = bsl.data.hdr.BSL.TherapySnapshot.Right.FrequencyInHertz;
+                        %     else
+                        %         error('neither Left nor Right TherapySnapshot present');
+                        %     end
+                        %     hold on
+                        % 
+                        %     [tf,t,f]=perceive_raw_tf(fulldata.trial{1}(1,:),fulldata.fsample,128,.3);
+                        %     mpow=nanmean(tf(perceive_sc(f,pkfreq-4):perceive_sc(f,pkfreq+4),:));
+                        %     yyaxis right
+                        %     ylabel('LFP and STIM amplitude')
+                        %     plot(fulldata.time{1},fulldata.trial{1}(3,:))
+                        %     %LAmp = fulldata.trial{1}(3,:);
+                        %     xlim([fulldata.time{1}(1),fulldata.time{1}(end)])
+                        %     hold on
+                        %     plot(fulldata.time{1},fulldata.trial{1}(5,:).*1000)
+                        %     plot(t,mpow.*1000)
+                        %     title(strrep({fulldata.label{3},fulldata.label{5}},'_',' '))
+                        %     axes('Position',[.34 .8 .1 .1])
+                        %     box off
+                        %     plot(f,nanmean(log(tf),2))
+                        %     xlabel('F')
+                        %     ylabel('P')
+                        %     xlim([3 40])
+                        % 
+                        %     axes('Position',[.16 .8 .1 .1])
+                        %     box off
+                        %     plot(fulldata.time{1},fulldata.trial{1}(1,:))
+                        %     xlabel('T'),ylabel('A')
+                        %     xx = randi(round([fulldata.time{1}(1),fulldata.time{1}(end)]),1);
+                        %     xlim([xx xx+1.5])
+                        % 
+                        %     subplot(2,2,3)
+                        %     imagesc(t,f,log(tf)),axis xy,
+                        %     xlabel('Time [s]')
+                        %     ylabel('Frequency [Hz]')
+                        % 
+                        %     subplot(2,2,2)
+                        %     yyaxis left
+                        %     plot(fulldata.time{1},fulldata.trial{1}(2,:))
+                        %     ylabel('Raw amplitude')
+                        %     if isfield(bsl.data.hdr.BSL.TherapySnapshot,'Right')
+                        %         pkfreq = bsl.data.hdr.BSL.TherapySnapshot.Right.FrequencyInHertz;
+                        %     elseif isfield(bsl.data.hdr.BSL.TherapySnapshot,'Left')
+                        %         pkfreq = bsl.data.hdr.BSL.TherapySnapshot.Left.FrequencyInHertz;
+                        %     else
+                        %         error('neither Left nor Right TherapySnapshot present');
+                        %     end
+                        %     hold on
+                        %     [tf,t,f]=perceive_raw_tf(fulldata.trial{1}(2,:),fulldata.fsample,fulldata.fsample,.5);
+                        %     mpow=nanmean(tf(perceive_sc(f,pkfreq-4):perceive_sc(f,pkfreq+4),:));
+                        %     yyaxis right
+                        %     ylabel('LFP and STIM amplitude')
+                        %     plot(fulldata.time{1},fulldata.trial{1}(4,:))
+                        %     %RAmp = fulldata.trial{1}(4,:);
+                        %     xlim([fulldata.time{1}(1),fulldata.time{1}(end)])
+                        %     hold on
+                        %     plot(fulldata.time{1},fulldata.trial{1}(6,:).*1000)
+                        %     plot(t,mpow.*1000)
+                        % 
+                        %     title(strrep({fulldata.fname,fulldata.label{4},fulldata.label{6}},'_',' '))
+                        %     %%
+                        %     axes('Position',[.78 .8 .1 .1])
+                        %     box off
+                        %     plot(f,nanmean(log(tf),2))
+                        %     xlim([3 40])
+                        %     xlabel('F')
+                        %     ylabel('P')
+                        % 
+                        %     axes('Position',[.6 .8 .1 .1])
+                        %     box off
+                        %     plot(fulldata.time{1},fulldata.trial{1}(2,:))
+                        %     xlabel('T'),ylabel('A')
+                        %     xlim([xx xx+1.5])
+                        % 
+                        %     subplot(2,2,4)
+                        %     imagesc(t,f,log(tf)),axis xy,
+                        %     xlabel('Time [s]')
+                        %     ylabel('Frequency [Hz]')
+                        % 
+                        %     perceive_print(fullfile('.',hdr.fpath, fulldata.fname))
+                        % else
+                        %     disp('The recording was less than 20 seconds. There is a potential problem: a figure got not created, but the code below would print the current figure (which holds something else than the current ''data'')!');
+                        %     disp('Please, review it when missing.');
+                        % end
                         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
                     end
                     %% save data of BSTD
@@ -633,7 +516,7 @@ for idxFile = 1:length(files)
                     end
                     data=fulldata;
                     run = 1;
-                    fullname = [fullname '_run-' num2str(run)];
+                    %fullname = [fullname '_run-' num2str(run)];
                     while isfile([fullname '.mat'])
                         run = run+1;
                         fullname = (regexp(fullname, '.*_run-','match'));
@@ -641,13 +524,16 @@ for idxFile = 1:length(files)
                     end
                     [~,fname,~] = fileparts(fullname);
                     data.fname = [fname '.mat'];
-                    disp(['WRITING ' fullname '.mat as FieldTrip file.'])
-                    save([fullname '.mat'],'data')
+                    disp(['WRITING ' fullname ' as FieldTrip file.'])
+                    save([fullname],'data')
                     if sesMedOffOn01
                         MetaT= perceive_metadata_to_table(MetaT,data);
                     end
                 end
             end
+            % future to be implemented: removed current BSL from
+            % list_of_BSL. Then at the end: check whether any BSL are
+            % remaining
             %% no BSTD, so save the data
         else
 
@@ -659,7 +545,7 @@ for idxFile = 1:length(files)
                 perceive_plot_raw_signals(data); % for LMTD
                 perceive_print(fullname);
             elseif any(extended)
-                perceive_plot_raw_signals(data); % for LMTD
+                perceive_plot_raw_signals(data); % for all data
                 perceive_print(fullname);
             end
 
@@ -697,17 +583,17 @@ for idxFile = 1:length(files)
             %%% add the new tasks names
             for i = 1:height(MetaT) %update the task name
                 % Concatenate existing taskItems with MetaT.task
-                mergedTasks = [localsettings.taskItems(:); MetaT.task(:)];
+                mergedTasks = [config.taskItems(:); MetaT.task(:)];
 
                 %  remove duplicates, preserve order
                 [~,idx] = unique(mergedTasks,'stable');
-                localsettings.taskItems = mergedTasks(idx);
+                config.taskItems = mergedTasks(idx);
             end
 
             disp(['OPENING GUI' newline 'now confirm or adapt file naming through the GUI'])
 
             % Launch the App Designer GUI
-            app = perceive_gui(MetaT, localsettings);
+            app = perceive_gui(MetaT, config);
 
             % Ensure orderly shutdown if the user closes the window
             app.UIFigure.CloseRequestFcn = @(src,event) onAppClose(app);
@@ -738,12 +624,12 @@ for idxFile = 1:length(files)
                 delete(app);
             end
 
-        else
-            error('I need to check the localsettings by JV')
+            %else
+            %    error('I need to check the config localsettings by JV')
             %%
             % if localsettings.check_gui_tasks
             %     if height(MetaT)==length(localsettings.mod)
-            % 
+            %
             %         for i = 1:height(MetaT) %update the task name
             %             if contains(MetaT.perceiveFilename{i},'TASK')
             %                 assert(contains(MetaT.perceiveFilename{i},localsettings.mod{i}))
@@ -753,7 +639,7 @@ for idxFile = 1:length(files)
             %     elseif all(strcmp(localsettings.task, 'Rest'))
             %         for i = 1:height(MetaT)
             %             assert(contains(MetaT.perceiveFilename{i},'Rest'))
-            % 
+            %
             %         end
             %     else
             %         assert( height(MetaT)==length(localsettings.mod), 'Tasks and mods not listed the same as in json file')
@@ -810,9 +696,9 @@ for idxFile = 1:length(files)
                 m=m+1;
             end
         end
-%% conversion to BIDS
-         
-        if localsettings.convert2bids
+        %% conversion to BIDS
+
+        if config.convert2bids
             for i = 1:height(MetaT)
                 cfg=struct();
                 load(fullfile(hdr.fpath,MetaT.perceiveFilename{i}),'data')
@@ -826,11 +712,11 @@ for idxFile = 1:length(files)
                 cfg.acq                     = entities.acq;
                 cfg.mod                     = entities.mod;
                 cfg.run                     = entities.run;
-        
+
                 cfg.ieeg.ElectricalStimulationParameters = data.hdr.js.Groups;
                 cfg.ieeg.ElectricalStimulationParameters = removeField(cfg.ieeg.ElectricalStimulationParameters, 'SignalFrequencies');
                 cfg.ieeg.ElectricalStimulationParameters = removeField(cfg.ieeg.ElectricalStimulationParameters, 'SignalPsdValues');
-        
+
                 %% save data
                 if strcmp(cfg.mod,'BrainSenseBip')
                     data.label=data.label(:,end-1:end);
@@ -847,5 +733,4 @@ for idxFile = 1:length(files)
     end
 end
 disp('all done!')
-%ubersichtzeit
 end
