@@ -1,7 +1,17 @@
 function MetaT = perceive_metadata_to_table(MetaT, data)
 fname=data.fname;
 if contains(fname, ["LMTD","BrainSense","ISRing","EI","ES"])
-    splitted_fname=split(fname,'_');
+    splitted_fname = regexp(fname, '[_.]', 'split');
+    % --- Assertions for required prefixes ---
+    assert(startsWith(splitted_fname{2}, "ses-"),  ...
+        'Invalid session format in "%s": must start with "ses-"', fname);
+    assert(startsWith(splitted_fname{3}, "task-"), ...
+        'Invalid task format in "%s": must start with "task-"', fname);
+    assert(startsWith(splitted_fname{4}, "acq-"),  ...
+        'Invalid acquisition format in "%s": must start with "acq-"', fname);
+    assert(startsWith(splitted_fname{6}, "run-"),  ...
+        'Invalid run format in "%s": must start with "run-"', fname);
+
     ses = lower(splitted_fname{2}(5:9));
     if contains(splitted_fname{2}, 'MedOnOff')
         med = 'm9';
@@ -26,6 +36,7 @@ if contains(fname, ["LMTD","BrainSense","ISRing","EI","ES"])
     cond = [med stim];
     acq = splitted_fname{4}(5:end);
     task = splitted_fname{3}(6:end);
+    run = splitted_fname{6}(5:end);
     nomatch = true;
     i=0;
     tobefound = ["Bip","RingL","RingR","SegmInterL","SegmInterR","SegmIntraL","SegmIntraR", "Ring", "SegmR", "SegmL", "notspec"];
@@ -37,7 +48,7 @@ if contains(fname, ["LMTD","BrainSense","ISRing","EI","ES"])
         end
     end
     [~, ori, ~] = fileparts(data.hdr.OriginalFile);
-    cellarr = {[ori '.json'], fname,  ses, cond, task, contacts, fname(end-4), '', acq, 'keep'}; %add parts and stim settings
+    cellarr = {[ori '.json'], fname,  ses, cond, task, contacts, run, '', acq, 'keep'}; %add parts and stim settings
     MetaT = [MetaT; cellarr];
 end
 end
