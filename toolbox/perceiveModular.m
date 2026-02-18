@@ -26,7 +26,7 @@ arguments
 
     sesMedOffOn01 {mustBeMember(sesMedOffOn01,["","MedOff","MedOn","MedDaily","MedOff01","MedOn01","MedOff02","MedOn02","MedOff03","MedOn03","MedOffOn01","MedOffOn02","MedOffOn03","MedOnPostOpIPG","MedOffPostOpIPG","Unknown", "PostOp"])} = '';
     % session:
-    % input e.g. ["","MedOff","MedOn","MedDaily","MedOff01","MedOn01"]
+    % input e.g. ['','MedOff','MedOn','MedDaily','MedOff01','MedOn01','MedOff02','MedOn02','MedOff03','MedOn03','MedOffOn01','MedOffOn02','MedOffOn03','MedOnPostOpIPG','MedOffPostOpIPG','Unknown', 'PostOp']
     %
 
     extended {mustBeMember(extended,["","yes"])} = '';
@@ -50,6 +50,30 @@ arguments
 
 end
 %% INPUT use examples:
+perceiveModular() % run all files in current directory or if none open explorer to select file
+perceiveModular('Report_Json_Session_Report_20200115T123657.json') % run this file
+perceiveModular({'Report_Json_Session_Report_20200115T123657.json','Report_Json_Session_Report_20200115T123658.json'}) % run these files
+perceiveModular('',5) % name subject sub-005
+perceiveModular('','23') % name subject sub-023
+perceiveModular('','') % automatic name subject based on ImplantDate, first letter of disease type and target (e.g. sub-2020110DGpi)
+perceiveModular('','','MedOff') % name session ses-MedOff
+perceiveModular('','','PostOp') % name session ses-PostOp input e.g. ['','MedOff','MedOn','MedDaily','MedOff01','MedOn01','MedOff02','MedOn02','MedOff03','MedOn03','MedOffOn01','MedOffOn02','MedOffOn03','MedOnPostOpIPG','MedOffPostOpIPG','Unknown', 'PostOp']
+perceiveModular('','','') % automatic name session based on the session date
+perceiveModular('','','','yes') % gives an extensive output of chronic, calibration, lastsignalcheck, diagnostic, impedance and snapshot data
+perceiveModular('','','','') % regular output (default)
+perceiveModular('','','','', 'yes') %use gui for renaming and concatenation at end of perceive output
+perceiveModular('','','','', '') % no gui (default)
+perceiveModular('','','','', '', '') % localsettings (default)
+% default is '', which is default
+    % alternative: Charite Duesseldorf Wuerzburg or custom naming
+    % names refer to the perceive\toolbox\config or any other file in your matlab folder which contains
+    % perceive_localsettings_default.json
+    % perceive_localsettings_charite.json
+    % perceive_localsettings_duesseldorf.json
+    % perceive_localsettings_wuerzburg.json
+    % perceive_localsettings_"custom name".json with custom name to be
+    % filled in, together with custom settings. Needs to be in matlab path, needs start with perceive_localsettings_*json, but does not need to be in the perceive\toolbox\config folder
+    % possible datafields from Medtronic Percept are  ["","BrainSenseLfp","BrainSenseSurvey","BrainSenseTimeDomain","CalibrationTests","DiagnosticData","EventSummary","Impedance","IndefiniteStreaming","LfpMontageTimeDomain","MostRecentInSessionSignalCheck","PatientEvents"])} ='';
 
 
 %% OUTPUT Overview
