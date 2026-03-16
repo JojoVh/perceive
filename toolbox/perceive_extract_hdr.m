@@ -92,7 +92,12 @@ else
 end
 
 % implant date
-hdr.ImplantDate = strrep(strrep(js.DeviceInformation.Final.ImplantDate(1:end-1), 'T', '_'), ':', '-');
+if contains(js.DeviceInformation.Final.ImplantDate(1:end-1), char(9608))
+        hdr.ImplantDate = '';
+else
+        hdr.ImplantDate = strrep(strrep(js.DeviceInformation.Final.ImplantDate(1:end-1), 'T', '_'), ':', '-');
+end
+
 
 % battery %
 if isfield(js, 'BatteryInformation')
