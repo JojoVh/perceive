@@ -414,6 +414,8 @@ for js_element = 1:numel(runs_FirstPacketDateTime)
         d.hdr.Fs = d.fsample;
     d.hdr.label = d.label;
 
+
+    
     firstsample = set_firstsample(data(i(1)).TicksInMses);
     lastsample = firstsample + size(d.trial{1}, 2) - 1;
     d.sampleinfo(1, :) = [firstsample, lastsample];

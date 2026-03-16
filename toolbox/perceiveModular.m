@@ -31,7 +31,7 @@ arguments
 
     extended {mustBeMember(extended,["","yes"])} = '';
     % '' means not extended, 'yes' means extended (default no)
-    % gives an extensive output of chronic, calibration, lastsignalcheck, diagnostic, impedance and snapshot data
+    % gives an extensive output of chronic (=diagnosticdata.LFPTrendlogs), calibration, lastsignalcheck, diagnostic, impedance and snapshot data
 
     gui {mustBeMember(gui,["","yes"])} = '';
     % '' means no gui, 'yes' means gui (default no)
@@ -110,6 +110,9 @@ end
 % IMPROVE CHRONIC DIAGNOSTIC READINGS
 % ADD Lead DBS Integration for electrode location
 
+%% check dependencies
+ % Call the function to handle the function availability
+    perceive_set_dependencies();
 %% perceive input
 
 % creates a config struct that contains all files, subjectIDs and further settings
@@ -210,11 +213,11 @@ for idxFile = 1:length(files)
 
                         % handle LFPTrendLogs
                         if isfield(data, 'LFPTrendLogs')
-                            alldata_diag = perceive_extract_diagnostic_lfptrend(data, hdr);
+                            alldata_diag = perceive_extract_diagnostic_lfptrend(data, hdr); %individual chronic data
                             alldata = [alldata, alldata_diag];
 
                             % plot combined LFP trend (L/R stim and LFP)
-                            if config.extended
+                            if config.extended %Plot total Chronic data
                                 for idxTrendLog = 1:length(alldata_diag)
                                     if strcmp(alldata_diag{idxTrendLog}.datatype, 'DiagnosticData.LFPTrends') && ...
                                             isfield(alldata_diag{idxTrendLog}, 'label') && numel(alldata_diag{idxTrendLog}.label) == 4
@@ -757,3 +760,5 @@ for idxFile = 1:length(files)
 end
 disp('all done!')
 end
+
+
