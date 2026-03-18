@@ -151,11 +151,11 @@ for idxFile = 1:length(files)
         continue
     end
 
-    % build hdr struct containing relevant patient data
-    hdr = perceive_extract_hdr(js, filename, config);
-
     % check dataversion
     config = perceive_check_dataversion(js,config);
+    
+    % build hdr struct containing relevant patient data
+    hdr = perceive_extract_hdr(js, filename, config);
 
     % create metatable %determine
     MetaT = cell2table(cell(0,10),'VariableNames', {'report','perceiveFilename','session','condition','task','contacts','run','part','acq','remove'});
