@@ -182,12 +182,8 @@ hdr.chan = ['LFP_' hdr.LeadLocation];
 % ----------------------------
 % version check
 % ----------------------------
-if isfield(js, 'DataVersion')
-    assert(strcmp(js.DataVersion, '1.2'), 'Only DataVersion 1.2 supported');
-    hdr.DataVersion = 1.2;
-else
-    hdr.DataVersion = 0;
-end
+% see function config = perceive_check_dataversion(js, config)
+hdr.DataVersion = config.DataVersion;
 
 % ----------------------------
 % default datafields if missing
