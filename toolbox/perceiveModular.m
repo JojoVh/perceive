@@ -274,8 +274,12 @@ for idxFile = 1:length(files)
                     perceive_extract_brainsensesurvey(data, hdr); %this does not save any data
 
                 case 'BrainSenseSurveys'
-                    assert(config.DataVersion == 1.2)
-                    %continue
+                    if config.DataVersion ~= 1.2 && config.DataVersion ~= 1.3
+                        warning('For "BrainSenseSurveys": DataVersion: %.1f. Expected 1.2 or 1.3.', config.DataVersion);
+                    else
+                        warning('For "BrainSenseSurveys": DataVersion 1.2 or 1.3. data should be exact copy of "BrainSenseSurvey", and is only be processed under "BrainSenseSurvey"');
+                    end
+                    %continue, no processing here
 
                 case 'BrainSenseSurveysTimeDomain'
                     alldata_bstd = perceive_extract_brainsensesurveystimedomain(data, hdr);
