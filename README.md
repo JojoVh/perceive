@@ -66,12 +66,13 @@ default is '', which is default
 alternative: Charite Duesseldorf Wuerzburg or custom naming
 
 names refer to the perceive\toolbox\config or any other file in your matlab folder which contains
-
+```matlab
 perceive_localsettings_default.json
 perceive_localsettings_charite.json
 perceive_localsettings_duesseldorf.json
 perceive_localsettings_wuerzburg.json
 perceive_localsettings_"custom name".json with custom name to be
+```
 
 filled in, together with custom settings. Needs to be in matlab path, needs start with perceive_localsettings_*json, but does not need to be in the perceive\toolbox\config folder
 possible datafields from Medtronic Percept are
@@ -113,11 +114,11 @@ perceiveModular('','','','', '') % no gui (default)
 
 perceiveModular('','','','', '', '') % localsettings (default)
 
-perceiveModular('','','','', '', 'perceive_localsettings_default.json') % localsettings (default)
+perceiveModular('','','','', '', 'default') % localsettings (default), refering to perceive_localsettings_default.json
 
-perceiveModular('','','','', '', 'perceive_localsettings_charite.json') % localsettings charite-specific
+perceiveModular('','','','', '', 'charite') % localsettings charite-specific, refering to perceive_localsettings_charite.json
 
-perceiveModular('','','','', '', 'perceive_localsettings_mylab.json') % localsettings your lab-specific
+perceiveModular('','','','', '', 'mylab') % localsettings your lab-specific, refering to perceive_localsettings_mylab.json
 ```
 ## applied example
 ```matlab
