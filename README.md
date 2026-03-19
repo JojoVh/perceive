@@ -6,14 +6,19 @@
 # Perceive (MATLAB)
 
 https://github.com/neuromodulation/perceive 
-v0.2 Contributors Tomas Sieger, Wolf-Julian Neumann, Gerd Tinkhauser
-v0.3 Contributor Jojo Vanhoecke
+Contributors Wolf-Julian Neumann, Gerd Tinkhauser, Tomas Sieger
+
+Active branch (beta version):
+https://github.com/neuromodulation/perceive/edit/hackathonretune/
+Contributor Jojo Vanhoecke and colleagues from Unit for Movement Disorders, Charité
+
 This is an open research tool that is not intended for clinical purposes. 
 
 # INPUT
 
-perceiveModular(files, sub, ses, extended, gui, localsettings_name)
-
+```matlab
+perceiveModular(files, sub, sesMedOffOn01, extended, gui, localsettings_name)
+```
 ## files:
 All input is optional, you can specify files as cell or character array
 (e.g. `files = 'Report_Json_Session_Report_20200115T123657.json'`) 
@@ -61,12 +66,13 @@ default is '', which is default
 alternative: Charite Duesseldorf Wuerzburg or custom naming
 
 names refer to the perceive\toolbox\config or any other file in your matlab folder which contains
-
+```matlab
 perceive_localsettings_default.json
 perceive_localsettings_charite.json
 perceive_localsettings_duesseldorf.json
 perceive_localsettings_wuerzburg.json
 perceive_localsettings_"custom name".json with custom name to be
+```
 
 filled in, together with custom settings. Needs to be in matlab path, needs start with perceive_localsettings_*json, but does not need to be in the perceive\toolbox\config folder
 possible datafields from Medtronic Percept are
@@ -108,18 +114,17 @@ perceiveModular('','','','', '') % no gui (default)
 
 perceiveModular('','','','', '', '') % localsettings (default)
 
-perceiveModular('','','','', '', 'perceive_localsettings_default.json') % localsettings (default)
+perceiveModular('','','','', '', 'default') % localsettings (default), refering to perceive_localsettings_default.json
 
-perceiveModular('','','','', '', 'perceive_localsettings_charite.json') % localsettings charite-specific
+perceiveModular('','','','', '', 'charite') % localsettings charite-specific, refering to perceive_localsettings_charite.json
 
-perceiveModular('','','','', '', 'perceive_localsettings_mylab.json') % localsettings your lab-specific
+perceiveModular('','','','', '', 'mylab') % localsettings your lab-specific, refering to perceive_localsettings_mylab.json
 ```
 ## applied example
 ```matlab
 perceiveModular('Report_Json_Session_Report_20200115T123657.json',25,'MedOff','yes', 'yes', 'perceive_localsettings_default.json') % combination of all above
 
 ```
-
 # OUTPUT
 
 The script generates BIDS bids.neuroimaging.io/ inspired subject and session folders with the
@@ -138,26 +143,46 @@ CT = Calibration Testing - Calibration Tests
 
 BSL = BrainSense LFP (2 Hz power average + stimulation settings)
 
+BSTD = BrainSense Time Domain (250 Hz raw data corresponding to the BSL file)
+
+BrainSenseBIp = BrainSense Bipolar, is merged combination of 2 BSTD with 1 BSL file.
+
 EI = Electrode Identifier (as of DataVersion 1.2)
 
+# Graphical User Interface (GUI)
 
+## if GUi use is "yes"
+specify to use the GUI
+```matlab
+perceiveModular('Report_Json_Session_Report_20200115T123657.json',9,'','', 'yes') %use gui for renaming and concatenation at end of perceive output
+```
+the GUI allows for
+* remove unwanted streams
+* specifying task names
+* specifying run number
+* specifying acquisition, including stimulation options
+* * advanced settings
+* specifying part number
+* * for concatenating streams with exactly the same name, apart from the part number
+ 
+![Overview perceive GUI](images/Overview_perceive_GUI.png)
 
-# Extra Note on use of GUI
-
+![Overview perceive GUI detail](images/Overview_perceive_GUI_detail.png)
 
 
 # Stream concatenation
 ## i.e. stitching 2 or more streams together due to interruption
 
-## How?
 The sampleinfo is used, which is a sample information based on the MSecTicks.
 The sampleinfotime is now the sample number of the FirstPackageTime of the absolute time, computed from midnight, with a length of the sample frequency x the trial length (no further correction).
 2 streams are concatenated by compute the sample difference between the last sample of the first part, and the first sample of the next part, (iteratively for multiple parts). This amount are the NaN values inserted when concatenating the streams.
 
-##GUI
+## note on time-specificity
 
-
-
+Because the FirstPacketDateTime is used, the resolution of that is 1 second, according to the Medtronic documentation.
+The TicksInMSec have a resolution of 50ms, however, it is according to the ongoing information exchange with Medtronic as of now not possible to use the TicksInMSec of 2 streams to use these for concatenation.
+According to the documenation TicksInMSec roll over at 2^16 Ticks unless it is an ongoing streaming. However, we were unable to find a satisfying solution for stream concatination based on our observations.
+For higher time resolution and external synchronization, we refer to our colleagues with the Toolbox DBSSync [DOI: 10.21203/rs.3.rs-8228751/v1](https://doi.org/10.21203/rs.3.rs-8228751/v1)
 
 ## Manually increasing or decreasing the NaN interval
 
@@ -178,9 +203,27 @@ perceive_stitch_interruption_together('sub-006_ses-Fu18mMedOff02_task-Rest_acq-S
 perceive_stitch_interruption_together('sub-006_ses-Fu18mMedOff02_task-Rest_acq-StimOff_mod_BrainSenseBip_run-1_part-', -145, true) %remove 145ms of NaNs from the the default NaN-insertion in between streams
 ```
 
- 
+# artefact rejection
+Currently, there is in this perceiveModular version no automatic artefact rejection (e.g. ECG cleaning); we refer to our colleagues [DOI: 10.21203/rs.3.rs-8228751/v1](https://doi.org/10.21203/rs.3.rs-8228751/v1)
+and the Stam et al. 2023 Clinical Neurophysiology [DOI: 10.1016/j.clinph.2022.11.011](https://doi.org/10.1016/j.clinph.2022.11.011)
 
- 
+# package loss
+Currently, there is no correction implemented for package loss, as it did not produce stable results for us.
+Therefore, we refer to the documenation of Medtronic:
+```matlab
+TDtime = (TicksInMses(end)- (GlobalPacketSize(end)-1)/fsample) : 1/fsample : TicksInMses(end);
+for m=length(GlobalPacketSize):-1:2
+if TicksInMses(m)-TicksInMses(m-1) > (1 + GlobalPacketSize(m))/ fsample
+Prev_packet = (TicksInMses(m-1)- (GlobalPacketSize(m-1)-1)/ fsample) : 1/fsample : TicksInMses(m-1);
+TDtime = [Prev_packet,TDtime];
+else
+Prev_packet = (TDtime(1)- GlobalPacketSize(m-1)/ fsample): 1/fsample : TDtime(1) - 1/fsample;
+TDtime = [Prev_packet,TDtime];
+end
+end
+```
 
-BSTD = BrainSense Time Domain (250 Hz raw data corresponding to the BSL file)
+# contact
+For feedback and remarks please contact Jojo Vanhoecke and their supervisor Prof. Dr. med. Wolf-Julian Neumann (julian.neumann@charite.de)
+ 
 
