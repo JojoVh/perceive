@@ -74,11 +74,11 @@ possible datafields from Medtronic Percept are
 ["","BrainSenseLfp","BrainSenseSurvey","BrainSenseTimeDomain","CalibrationTests","DiagnosticData","EventSummary","Impedance","IndefiniteStreaming","LfpMontageTimeDomain","MostRecentInSessionSignalCheck","PatientEvents"])} ='';
 ```
 
-# INPUT examples
+# MAIN USE
 ```matlab
  perceiveModular(files, sub, sesMedOffOn01, extended, gui, localsettings_name)
 ```
-
+# INPUT examples
 ```matlab
 perceiveModular() % run all files in current directory or if none open explorer to select file
 
@@ -114,6 +114,7 @@ perceiveModular('','','','', '', 'perceive_localsettings_charite.json') % locals
 
 perceiveModular('','','','', '', 'perceive_localsettings_mylab.json') % localsettings your lab-specific
 ```
+## applied example
 ```matlab
 perceiveModular('Report_Json_Session_Report_20200115T123657.json',25,'MedOff','yes', 'yes', 'perceive_localsettings_default.json') % combination of all above
 
