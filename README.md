@@ -26,22 +26,20 @@ files via the MATLAB uigetdir window.
 SubjectID: you can specify a subject ID for each file in case you want to follow an IRB approved naming scheme for file export
 
 e.g.
-```perceiveModular('Report_Json_Session_Report_20200115T123657.json',80)```
--> creates sub-080
-
-```perceiveModular('Report_Json_Session_Report_20200115T123657.json','080')```
--> also creates sub-080
-
-```perceiveModular('Report_Json_Session_Report_20200115T123657.json','Charite001')```
--> creates sub-Charite001
-
+```matlab
+perceiveModular('Report_Json_Session_Report_20200115T123657.json',80) %creates sub-080
+perceiveModular('Report_Json_Session_Report_20200115T123657.json','080') %also creates sub-080
+perceiveModular('Report_Json_Session_Report_20200115T123657.json','Charite001') %creates sub-Charite001
+```
 if unspecified or left empy, the subjectID will be created from
 ImplantDate, first letter of disease type and target (e.g. sub-2020110DGpi)
 
 ## ses:
 session:
 input e.g.
-```['','MedOff','MedOn','MedDaily','MedOff01','MedOn01','MedOff02','MedOn02','MedOff03','MedOn03','MedOffOn01','MedOffOn02','MedOffOn03','MedOnPostOpIPG','MedOffPostOpIPG','Unknown', 'PostOp']```
+```matlab
+['','MedOff','MedOn','MedDaily','MedOff01','MedOn01','MedOff02','MedOn02','MedOff03','MedOn03','MedOffOn01','MedOffOn02','MedOffOn03','MedOnPostOpIPG','MedOffPostOpIPG','Unknown', 'PostOp']
+```
     
 
 ## extended:
