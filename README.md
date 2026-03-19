@@ -6,14 +6,19 @@
 # Perceive (MATLAB)
 
 https://github.com/neuromodulation/perceive 
-v0.2 Contributors Tomas Sieger, Wolf-Julian Neumann, Gerd Tinkhauser
-v0.3 Contributor Jojo Vanhoecke
+Contributors Wolf-Julian Neumann, Gerd Tinkhauser, Tomas Sieger
+
+Active branch:
+https://github.com/neuromodulation/perceive/edit/hackathonretune/
+Contributor Jojo Vanhoecke
+
 This is an open research tool that is not intended for clinical purposes. 
 
 # INPUT
 
-perceiveModular(files, sub, ses, extended, gui, localsettings_name)
-
+```matlab
+perceiveModular(files, sub, sesMedOffOn01, extended, gui, localsettings_name)
+```
 ## files:
 All input is optional, you can specify files as cell or character array
 (e.g. `files = 'Report_Json_Session_Report_20200115T123657.json'`) 
