@@ -146,7 +146,8 @@ EI = Electrode Identifier (as of DataVersion 1.2)
 
 
 
-# Stream concatenation (stitching 2 or more streams together for interruption)
+# Stream concatenation
+## i.e. stitching 2 or more streams together due to interruption
 
 ## How?
 The sampleinfo is used, which is a sample information based on the MSecTicks.
