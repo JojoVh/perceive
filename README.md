@@ -165,9 +165,9 @@ the GUI allows for
 * specifying part number
 * * for concatenating streams with exactly the same name, apart from the part number
  
-![Alt Text](path/to/Overview_perceive_GUI.png)
+![Overview perceive GUI](images/Overview_perceive_GUI.png)
 
-![Alt Text](path/to/Overview_perceive_GUI_detail.png)
+![Overview perceive GUI detail](images/Overview_perceive_GUI_detail.png)
 
 
 # Stream concatenation
