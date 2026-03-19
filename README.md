@@ -25,11 +25,11 @@ files via the MATLAB uigetdir window.
 ## sub:
 SubjectID: you can specify a subject ID for each file in case you want to follow an IRB approved naming scheme for file export
 
-e.g. run perceiveModular('Report_Json_Session_Report_20200115T123657.json',80) -> creates sub-080
+e.g. run `perceiveModular('Report_Json_Session_Report_20200115T123657.json',80)` -> creates sub-080
 
-e.g. run perceiveModular('Report_Json_Session_Report_20200115T123657.json','080') -> also creates sub-080
+e.g. run `perceiveModular('Report_Json_Session_Report_20200115T123657.json','080')` -> also creates sub-080
 
-e.g. run perceiveModular('Report_Json_Session_Report_20200115T123657.json','Charite001') -> creates sub-Charite001
+e.g. run `perceiveModular('Report_Json_Session_Report_20200115T123657.json','Charite001')` -> creates sub-Charite001
 
 if unspecified or left empy, the subjectID will be created from
 ImplantDate, first letter of disease type and target (e.g. sub-2020110DGpi)
@@ -66,6 +66,7 @@ filled in, together with custom settings. Needs to be in matlab path, needs star
 possible datafields from Medtronic Percept are  ["","BrainSenseLfp","BrainSenseSurvey","BrainSenseTimeDomain","CalibrationTests","DiagnosticData","EventSummary","Impedance","IndefiniteStreaming","LfpMontageTimeDomain","MostRecentInSessionSignalCheck","PatientEvents"])} ='';
 
 # INPUT examples
+```matlab
 perceiveModular() % run all files in current directory or if none open explorer to select file
 
 perceiveModular('Report_Json_Session_Report_20200115T123657.json') % run this file
@@ -93,7 +94,7 @@ perceiveModular('','','','', 'yes') %use gui for renaming and concatenation at e
 perceiveModular('','','','', '') % no gui (default)
 
 perceiveModular('','','','', '', '') % localsettings (default)
-
+```
 
 # OUTPUT
 
@@ -112,6 +113,38 @@ IS = Indefinite Streaming - BrainSenseStreaming
 CT = Calibration Testing - Calibration Tests
 
 BSL = BrainSense LFP (2 Hz power average + stimulation settings)
+
+
+
+
+# Extra Note on use of GUI
+
+
+# Stream concatenation (stitching 2 or more streams together for interruption)
+
+
+Background:
+In order to concatenate 2 streams of the same modality within the same file, the GUI can be used or manually, the function
+`perceive_stitch_interruption_together(recording_basename, optional_time_addition_ms, save_file)`
+
+the "new" definition of the sampleinfo (by current perceive - latest version) is used, which is a sample information based on the MSecTicks.
+The sampleinfotime is now the sample number of the FirstPackageTime of the absolute time, computed from midnight, with a length of the sample frequency x the trial length (no further correction).
+2 recordings are concatenated by compute the sample difference between the last sample of the first part, and the first sample of the next part. (iteratively for multiple parts). This amount are the NaN values when concatenating.
+ 
+Now:
+The NaN interval is computed. You can add or substract ms from this NaN interval by a custom number.
+ 
+Examples how to use this:
+ 
+First run perceive, concatenate the 2 or more files over the GUI, just as normal.
+Then go to the folder with the PARTS. The regular part will be saved already as normal, with a NAN interval based on the timestamps.
+Modify this NAN interval by calling the parts (indicated by '_part-' at the end) and indicate your additional time in ms (or with negative time to shorten it).
+ 
+Base function, no saving. This is implemented in perceive. you do not need to run this.
+Add 250ms of additional NaNs in between recordings, save true.
+Add 496ms of additional NaNs in between recordings, save true.
+Decrease 100ms of additional NaNs in between recordings, save true.
+ 
 
 BSTD = BrainSense Time Domain (250 Hz raw data corresponding to the BSL file)
 
