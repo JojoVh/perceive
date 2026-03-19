@@ -10,7 +10,7 @@ Contributors Wolf-Julian Neumann, Gerd Tinkhauser, Tomas Sieger
 
 Active branch (beta version):
 https://github.com/neuromodulation/perceive/edit/hackathonretune/
-Contributor Jojo Vanhoecke
+Contributor Jojo Vanhoecke and colleagues from Unit for Movement Disorders, Charité
 
 This is an open research tool that is not intended for clinical purposes. 
 
