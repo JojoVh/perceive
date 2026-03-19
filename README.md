@@ -29,10 +29,13 @@ e.g.
 ```matlab
 perceiveModular('Report_Json_Session_Report_20200115T123657.json',80) %creates sub-080
 perceiveModular('Report_Json_Session_Report_20200115T123657.json','080') %also creates sub-080
+perceiveModular('Report_Json_Session_Report_20200115T123657.json',80) %also creates sub-080
 perceiveModular('Report_Json_Session_Report_20200115T123657.json','Charite001') %creates sub-Charite001
+perceiveModular('Report_Json_Session_Report_20200115T123657.json','') %creates sub-2020110DGpi
+perceiveModular('Report_Json_Session_Report_20200115T123657.json') %creates sub-2020110DGpi
 ```
 if unspecified or left empy, the subjectID will be created from
-ImplantDate, first letter of disease type and target (e.g. sub-2020110DGpi)
+ImplantDate, first letter of disease type and target abbreviation (e.g. `sub-2020110DGpi`)
 
 ## ses:
 session:
@@ -66,9 +69,16 @@ perceive_localsettings_wuerzburg.json
 perceive_localsettings_"custom name".json with custom name to be
 
 filled in, together with custom settings. Needs to be in matlab path, needs start with perceive_localsettings_*json, but does not need to be in the perceive\toolbox\config folder
-possible datafields from Medtronic Percept are  ```["","BrainSenseLfp","BrainSenseSurvey","BrainSenseTimeDomain","CalibrationTests","DiagnosticData","EventSummary","Impedance","IndefiniteStreaming","LfpMontageTimeDomain","MostRecentInSessionSignalCheck","PatientEvents"])} ='';```
+possible datafields from Medtronic Percept are
+```matlab
+["","BrainSenseLfp","BrainSenseSurvey","BrainSenseTimeDomain","CalibrationTests","DiagnosticData","EventSummary","Impedance","IndefiniteStreaming","LfpMontageTimeDomain","MostRecentInSessionSignalCheck","PatientEvents"])} ='';
+```
 
 # INPUT examples
+```matlab
+ perceiveModular(files, sub, sesMedOffOn01, extended, gui, localsettings_name)
+```
+
 ```matlab
 perceiveModular() % run all files in current directory or if none open explorer to select file
 
@@ -97,6 +107,16 @@ perceiveModular('','','','', 'yes') %use gui for renaming and concatenation at e
 perceiveModular('','','','', '') % no gui (default)
 
 perceiveModular('','','','', '', '') % localsettings (default)
+
+perceiveModular('','','','', '', 'perceive_localsettings_default.json') % localsettings (default)
+
+perceiveModular('','','','', '', 'perceive_localsettings_charite.json') % localsettings charite-specific
+
+perceiveModular('','','','', '', 'perceive_localsettings_mylab.json') % localsettings your lab-specific
+```
+```matlab
+perceiveModular('Report_Json_Session_Report_20200115T123657.json',25,'MedOff','yes', 'yes', 'perceive_localsettings_default.json') % combination of all above
+
 ```
 
 # OUTPUT
