@@ -8,7 +8,7 @@
 https://github.com/neuromodulation/perceive 
 Contributors Wolf-Julian Neumann, Gerd Tinkhauser, Tomas Sieger
 
-Active branch:
+Active branch (beta version):
 https://github.com/neuromodulation/perceive/edit/hackathonretune/
 Contributor Jojo Vanhoecke
 
@@ -221,5 +221,8 @@ TDtime = [Prev_packet,TDtime];
 end
 end
 ```
+
+# contact
+For feedback and remarks please contact Jojo Vanhoecke and their supervisor Prof. Dr. med. Wolf-Julian Neumann (julian.neumann@charite.de)
  
 
