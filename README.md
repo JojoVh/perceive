@@ -16,7 +16,7 @@ perceiveModular(files, sub, ses, extended, gui, localsettings_name)
 
 ## files:
 All input is optional, you can specify files as cell or character array
-(e.g. files = 'Report_Json_Session_Report_20200115T123657.json') 
+(e.g. `files = 'Report_Json_Session_Report_20200115T123657.json'`) 
 if files isn't specified or remains empty, it will automatically include
 all files in the current working directory
 if no files in the current working directory are found, a you can choose
@@ -25,18 +25,23 @@ files via the MATLAB uigetdir window.
 ## sub:
 SubjectID: you can specify a subject ID for each file in case you want to follow an IRB approved naming scheme for file export
 
-e.g. run `perceiveModular('Report_Json_Session_Report_20200115T123657.json',80)` -> creates sub-080
+e.g.
+```perceiveModular('Report_Json_Session_Report_20200115T123657.json',80)```
+-> creates sub-080
 
-e.g. run `perceiveModular('Report_Json_Session_Report_20200115T123657.json','080')` -> also creates sub-080
+```perceiveModular('Report_Json_Session_Report_20200115T123657.json','080')```
+-> also creates sub-080
 
-e.g. run `perceiveModular('Report_Json_Session_Report_20200115T123657.json','Charite001')` -> creates sub-Charite001
+```perceiveModular('Report_Json_Session_Report_20200115T123657.json','Charite001')```
+-> creates sub-Charite001
 
 if unspecified or left empy, the subjectID will be created from
 ImplantDate, first letter of disease type and target (e.g. sub-2020110DGpi)
 
 ## ses:
 session:
-input e.g. ['','MedOff','MedOn','MedDaily','MedOff01','MedOn01','MedOff02','MedOn02','MedOff03','MedOn03','MedOffOn01','MedOffOn02','MedOffOn03','MedOnPostOpIPG','MedOffPostOpIPG','Unknown', 'PostOp']
+input e.g.
+```['','MedOff','MedOn','MedDaily','MedOff01','MedOn01','MedOff02','MedOn02','MedOff03','MedOn03','MedOffOn01','MedOffOn02','MedOffOn03','MedOnPostOpIPG','MedOffPostOpIPG','Unknown', 'PostOp']```
     
 
 ## extended:
@@ -63,7 +68,7 @@ perceive_localsettings_wuerzburg.json
 perceive_localsettings_"custom name".json with custom name to be
 
 filled in, together with custom settings. Needs to be in matlab path, needs start with perceive_localsettings_*json, but does not need to be in the perceive\toolbox\config folder
-possible datafields from Medtronic Percept are  ["","BrainSenseLfp","BrainSenseSurvey","BrainSenseTimeDomain","CalibrationTests","DiagnosticData","EventSummary","Impedance","IndefiniteStreaming","LfpMontageTimeDomain","MostRecentInSessionSignalCheck","PatientEvents"])} ='';
+possible datafields from Medtronic Percept are  ```["","BrainSenseLfp","BrainSenseSurvey","BrainSenseTimeDomain","CalibrationTests","DiagnosticData","EventSummary","Impedance","IndefiniteStreaming","LfpMontageTimeDomain","MostRecentInSessionSignalCheck","PatientEvents"])} ='';```
 
 # INPUT examples
 ```matlab
