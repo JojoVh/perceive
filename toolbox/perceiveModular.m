@@ -421,9 +421,56 @@ for idxFile = 1:length(files)
                     fulldata.time{1}=fulldata.timeInSecDerivedFromTicks{1}; %the fulldate.time comes from perceive_extract_bstd d.time{1} = linspace(rel_start, rel_start + size(d.trial{1}, 2)/fsample, size(d.trial{1}, 2));
                     otime = bsl.data.time{1};
                     %% CRUCIAL PART where BSL is being added to fulldata of BSTD
-                    for c =1:4
-                        fulldata.trial{1}(c+2,:) = interp1(otime-otime(1),bsl.data.trial{1}(c,:),fulldata.time{1}-fulldata.time{1}(1),'nearest');
+                    % this snippet streches the BSL stream and put them
+                    % over the BSTD stream, which is typically longer in
+                    % the sense that is starts earlier and ends later.                                    
+                    % It aligns the TicksInMSes
+                    % to the same time point, and then crops the trials
+                    % The first TicksInMSes is stored in sampleinfo [1]
+                    
+                    BSTD_first_TickInMSes = fulldata.sampleinfo(1);
+                    BSL_first_TickInMSes = bsl.TicksInMs(1);
+                    if (BSTD_first_TickInMSes < BSL_first_TickInMSes) && (BSTD_first_TickInMSes - BSL_first_TickInMSes) < 2000
+                                            starttimedifference_sec = (BSL_first_TickInMSes - BSTD_first_TickInMSes)/1000;
+                    elseif (BSTD_first_TickInMSes < BSL_first_TickInMSes)
+                         warning('BSL recording started more than 2 seconds after BSTD.\n BSTD FirstPacketDateTime: %s\n BSL: %s', ...
+                                fulldata.FirstPacketDateTime, bsl.FirstPacketDateTime);
+                        error('BSDT_first_TickInMSes < BSL_first_TickInMSes is larger than 2 seconds')
+                    else
+                        warning(['BSL MTicks started before matched BSTD MTicks, which indicates unexpected json outcomes...' newline ...
+                            'BSL FirstPacketDateTime: %s with TicksInMs: %d' newline ...
+                            'BSTD FirstPacketDateTime: %s with TicksInMs: %d'], ...
+                            bsl.FirstPacketDateTime, BSL_first_TickInMSes, fulldata.FirstPacketDateTime, BSTD_first_TickInMSes)
+                        t1 = datetime(fulldata.FirstPacketDateTime, 'InputFormat', 'yyyy-MM-dd HH:mm:ss.SSS');
+                        t2 = datetime(bsl.FirstPacketDateTime, 'InputFormat', 'yyyy-MM-dd HH:mm:ss.SSS');
+                        diffSeconds = seconds(t2 - t1);
+                        if diffSeconds > 0
+                            starttimedifference_sec = diffSeconds; % Store the time difference for alignment
+                        else
+                            warning('BSL recording started before BSTD, which should be impossible.\nfulldata.FirstPacketDateTime: %s\nbsl.FirstPacketDateTime: %s', ...
+                                fulldata.FirstPacketDateTime, bsl.FirstPacketDateTime);
+                            starttimedifference_sec = 0;
+                        end
                     end
+                    
+                    % Find the indices of all numbers greater or equal to
+                    % num, in order to let BSL start afer the time
+                    % difference to BSTD
+                    indices = find(fulldata.time{1} >= starttimedifference_sec);
+
+                    if isempty(indices)
+                        % If no number is greater or equal, return empty or handle accordingly
+                        nextIndex = 1;
+                    else
+                        % Take the first index from those candidates (the next closest)
+                        nextIndex = indices(1);
+                    end
+                    fulldata.timeAlignedTicks =fulldata.trial;
+                    for c =1:4
+                        fulldata.timeAlignedTicks{1}(c+2,:) = interp1(otime-otime(1),bsl.data.trial{1}(c,:),fulldata.time{1}-fulldata.time{1}(nextIndex),'nearest');
+                    end
+                    fulldata.trial=fulldata.timeAlignedTicks; %this is here in order to be able to checke fulldata time vs the interpolation in debugging mode
+                    fulldata = rmfield(fulldata, 'timeAlignedTicks'); % clean up here
                     %% determine StimOff or StimOn
 
                     acq=regexp(bsl.data.fname,'Stim.*(?=_mod)','match'); %Search for StimOff StimOn
