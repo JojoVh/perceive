@@ -430,21 +430,21 @@ for idxFile = 1:length(files)
                     
                     BSTD_first_TickInMSes = fulldata.sampleinfo(1);
                     BSL_first_TickInMSes = bsl.TicksInMs(1);
-                    if (BSTD_first_TickInMSes < BSL_first_TickInMSes) && (BSTD_first_TickInMSes - BSL_first_TickInMSes) < 2000
+                    if (BSTD_first_TickInMSes < BSL_first_TickInMSes) && (BSTD_first_TickInMSes - BSL_first_TickInMSes) < 2500
                                             starttimedifference_sec = (BSL_first_TickInMSes - BSTD_first_TickInMSes)/1000;
                     elseif (BSTD_first_TickInMSes < BSL_first_TickInMSes)
                          warning('BSL recording started more than 2 seconds after BSTD.\n BSTD FirstPacketDateTime: %s\n BSL: %s', ...
                                 fulldata.FirstPacketDateTime, bsl.FirstPacketDateTime);
-                        error('BSDT_first_TickInMSes < BSL_first_TickInMSes is larger than 2 seconds')
+                        error('BSDT_first_TickInMSes < BSL_first_TickInMSes is larger than 2.5 seconds, which should not be possible, please contact Jojo Vanhoecke (Prof Julian Neumann, julian.neumann@charite.de)')
                     else
-                        warning(['BSL MTicks started before matched BSTD MTicks, which indicates unexpected json outcomes...' newline ...
+                         warning(['BSL MTicks started before matched BSTD MTicks, which indicates unexpected json outcomes...' newline ...
                             'BSL FirstPacketDateTime: %s with TicksInMs: %d' newline ...
                             'BSTD FirstPacketDateTime: %s with TicksInMs: %d'], ...
                             bsl.FirstPacketDateTime, BSL_first_TickInMSes, fulldata.FirstPacketDateTime, BSTD_first_TickInMSes)
                         t1 = datetime(fulldata.FirstPacketDateTime, 'InputFormat', 'yyyy-MM-dd HH:mm:ss.SSS');
                         t2 = datetime(bsl.FirstPacketDateTime, 'InputFormat', 'yyyy-MM-dd HH:mm:ss.SSS');
                         diffSeconds = seconds(t2 - t1);
-                        if diffSeconds > 0
+                        if diffSeconds >= 0
                             starttimedifference_sec = diffSeconds; % Store the time difference for alignment
                         else
                             warning('BSL recording started before BSTD, which should be impossible.\nfulldata.FirstPacketDateTime: %s\nbsl.FirstPacketDateTime: %s', ...
