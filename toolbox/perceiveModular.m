@@ -381,11 +381,15 @@ for idxFile = 1:length(files)
 
                 %% search for the matching BSL file
                 found = false;
-
+               
                 for i = 1:length(alldata)
-
-                    bsl = alldata{i};
-
+                    
+                    % --- Check if it is a BSL file ---
+                    if any(contains(alldata{i}.fname, list_of_BSL))
+                        bsl = alldata{i};
+                    else
+                        continue %no BSL file
+                    end
                     % --- Check SessionEndDate match ---
                     if ~isequal(bsl.hdr.OriginalFile, fulldata.hdr.OriginalFile)
                         continue
@@ -406,7 +410,7 @@ for idxFile = 1:length(files)
                 % --- If no match found, throw error ---
                 if ~found
                     warning('BSL file could not be matched BSTD data to create BrainSense.')
-                    error('No matching BSL could be found: same json file name but no FirstPackageDateTime within 1 second.');
+                    warning('No matching BSL could be found: same json file name but no FirstPackageDateTime within 1.5 seconds.');
                 else
                     bsl.data = bsl; %change this later
 
