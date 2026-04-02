@@ -18,7 +18,7 @@ function alldata_bstd = perceive_extract_bstd(data, hdr, config)
 %
 % notes:
 %   - Assumes 'runs' are grouped by unique FirstPacketDateTime.
-%   - Time is reconstructed relative to hdr.d0 (session reference datetime).
+%   - Time is reconstructed relative to session reference datetime (dropping year/month/day).
 
 
 %mod = 'mod-BSTD';

@@ -4,7 +4,7 @@ function perceive_extract_brainsensesurvey(data, hdr)
 %
 % inputs:
 %   data - input data struct from Percept JSON
-%   hdr - header struct with fields like hdr.d0, hdr.chan, hdr.fpath, etc.
+%   hdr - header struct
 %
 % output:
 %   none
