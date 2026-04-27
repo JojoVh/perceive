@@ -1,4 +1,4 @@
-function localsettings = perceive_localsettings(localsettings_name)
+function localsettings = perceive_localsettings_from_mat(localsettings_name)
 
     % Default argument handling
     if nargin < 1 || isempty(localsettings_name)

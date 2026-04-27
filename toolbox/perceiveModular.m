@@ -303,7 +303,7 @@ for idxFile = 1:length(files)
 
                     if extended
                         alldata_sct = perceive_extract_sensechanneltests(data, hdr, config);
-                        alldata = [alldata, alldata_ct];
+                        alldata = [alldata, alldata_sct];
                     end
             end
         end
