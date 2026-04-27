@@ -7,7 +7,7 @@ arguments
     sub {mustBeA(sub,["char","cell","numeric"])} = ''
     sesMedOffOn01 {mustBeMember(sesMedOffOn01,["","MedOff","MedOn","MedDaily","MedOff01","MedOn01","MedOff02","MedOn02","MedOff03","MedOn03","MedOffOn01","MedOffOn02","MedOffOn03","MedOnPostOpIPG","MedOffPostOpIPG","Unknown"])} = ''
     extended {mustBeMember(extended,["","yes"])} = ''
-    gui {mustBeMember(gui,["","yes"])} = 'yes'
+    gui {mustBeMember(gui,["","yes"])} = ''
     datafields {mustBeText} = ''
 end
 
