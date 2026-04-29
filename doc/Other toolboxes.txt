@@ -1,0 +1,7 @@
+DBScope as a versatile computational toolbox for the visualization and analysis of sensing data from deep brain stimulation
+
+https://www.nature.com/articles/s41531-024-00740-z
+
+DBSsync: combining intracranial and multimodal data to investigate new biomarkers in Parkinson’s disease
+
+https://www.researchsquare.com/article/rs-8228751/v1
