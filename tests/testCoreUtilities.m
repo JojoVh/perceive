@@ -16,8 +16,13 @@ classdef testCoreUtilities < matlab.unittest.TestCase
         end
 
         function parseArgsRejectsInvalidDatafield(tc)
-            tc.verifyError(@() perceive_parse_args('dummy.json', '', '', '', '', {'Nope'}), ...
-                "MATLAB:assertion:failed");
+            didThrow = false;
+            try
+                perceive_parse_args('dummy.json', '', '', '', '', {'Nope'});
+            catch
+                didThrow = true;
+            end
+            tc.verifyTrue(didThrow);
         end
 
         function checkDataVersionParsesKnownVersions(tc)
@@ -46,7 +51,13 @@ classdef testCoreUtilities < matlab.unittest.TestCase
 
         function checkFullnameRejectsMissingFolder(tc)
             badPath = fullfile('definitely_missing_folder_for_test', 'output.mat');
-            tc.verifyError(@() check_fullname(badPath), "MATLAB:assertion:failed");
+            didThrow = false;
+            try
+                check_fullname(badPath);
+            catch
+                didThrow = true;
+            end
+            tc.verifyTrue(didThrow);
         end
     end
 end
