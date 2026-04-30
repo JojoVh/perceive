@@ -6,6 +6,7 @@ function testToolbox(options)
         options.ConnectToServer (1,1) logical = false;
         options.HtmlReports (1,1) logical = false;
         options.ReportSubdirectory (1,1) string = "";
+        options.Fast (1,1) logical = true;
     end
     
     import matlab.unittest.TestSuite;
@@ -25,7 +26,11 @@ function testToolbox(options)
         mkdir(outputDirectory)
     end
     
-    suite = TestSuite.fromClass(?testProcessData); %adapt here
+    % Run all tests in the tests folder so CI validates the full baseline.
+    suite = TestSuite.fromFolder("tests", "IncludingSubfolders", true);
+    if options.Fast
+        suite = suite.selectIf(~HasTag("Slow"));
+    end
     if options.ConnectToServer
         suite = suite.selectIf(~HasTag('RequiresMock'));
         cdsapi_Factory.useMocks(false);
