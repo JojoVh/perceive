@@ -17,7 +17,7 @@ This is an open research tool that is not intended for clinical purposes.
 # INPUT
 
 ```matlab
-perceiveModular(files, sub, sesMedOffOn01, extended, gui, localsettings_name)
+perceive(files, sub, sesMedOffOn01, extended, gui, localsettings_name)
 ```
 ## files:
 All input is optional, you can specify files as cell or character array
@@ -32,12 +32,12 @@ SubjectID: you can specify a subject ID for each file in case you want to follow
 
 e.g.
 ```matlab
-perceiveModular('Report_Json_Session_Report_20200115T123657.json',80) %creates sub-080
-perceiveModular('Report_Json_Session_Report_20200115T123657.json','080') %also creates sub-080
-perceiveModular('Report_Json_Session_Report_20200115T123657.json',80) %also creates sub-080
-perceiveModular('Report_Json_Session_Report_20200115T123657.json','Charite001') %creates sub-Charite001
-perceiveModular('Report_Json_Session_Report_20200115T123657.json','') %creates sub-2020110DGpi
-perceiveModular('Report_Json_Session_Report_20200115T123657.json') %creates sub-2020110DGpi
+perceive('Report_Json_Session_Report_20200115T123657.json',80) %creates sub-080
+perceive('Report_Json_Session_Report_20200115T123657.json','080') %also creates sub-080
+perceive('Report_Json_Session_Report_20200115T123657.json',80) %also creates sub-080
+perceive('Report_Json_Session_Report_20200115T123657.json','Charite001') %creates sub-Charite001
+perceive('Report_Json_Session_Report_20200115T123657.json','') %creates sub-2020110DGpi
+perceive('Report_Json_Session_Report_20200115T123657.json') %creates sub-2020110DGpi
 ```
 if unspecified or left empy, the subjectID will be created from
 ImplantDate, first letter of disease type and target abbreviation (e.g. `sub-2020110DGpi`)
@@ -82,47 +82,47 @@ possible datafields from Medtronic Percept are
 
 # MAIN USE
 ```matlab
-perceiveModular(files, sub, sesMedOffOn01, extended, gui, localsettings_name)
+perceive(files, sub, sesMedOffOn01, extended, gui, localsettings_name)
 ```
 # INPUT examples
 ```matlab
-perceiveModular() % run all files in current directory or if none open explorer to select file
+perceive() % run all files in current directory or if none open explorer to select file
 
-perceiveModular('Report_Json_Session_Report_20200115T123657.json') % run this file
+perceive('Report_Json_Session_Report_20200115T123657.json') % run this file
 
-perceiveModular({'Report_Json_Session_Report_20200115T123657.json','Report_Json_Session_Report_20200115T123658.json'}) % run these files
+perceive({'Report_Json_Session_Report_20200115T123657.json','Report_Json_Session_Report_20200115T123658.json'}) % run these files
 
-perceiveModular('',5) % name subject sub-005
+perceive('',5) % name subject sub-005
 
-perceiveModular('','23') % name subject sub-023
+perceive('','23') % name subject sub-023
 
-perceiveModular('','') % automatic name subject based on ImplantDate, first letter of disease type and target (e.g. sub-2020110DGpi)
+perceive('','') % automatic name subject based on ImplantDate, first letter of disease type and target (e.g. sub-2020110DGpi)
 
-perceiveModular('','','MedOff') % name session ses-MedOff
+perceive('','','MedOff') % name session ses-MedOff
 
-perceiveModular('','','PostOp') % name session ses-PostOp input e.g. ['','MedOff','MedOn','MedDaily','MedOff01','MedOn01','MedOff02','MedOn02','MedOff03','MedOn03','MedOffOn01','MedOffOn02','MedOffOn03','MedOnPostOpIPG','MedOffPostOpIPG','Unknown', 'PostOp']
+perceive('','','PostOp') % name session ses-PostOp input e.g. ['','MedOff','MedOn','MedDaily','MedOff01','MedOn01','MedOff02','MedOn02','MedOff03','MedOn03','MedOffOn01','MedOffOn02','MedOffOn03','MedOnPostOpIPG','MedOffPostOpIPG','Unknown', 'PostOp']
 
-perceiveModular('','','') % automatic name session based on the session date
+perceive('','','') % automatic name session based on the session date
 
-perceiveModular('','','','yes') % gives an extensive output of chronic, calibration, lastsignalcheck, diagnostic, impedance and snapshot data
+perceive('','','','yes') % gives an extensive output of chronic, calibration, lastsignalcheck, diagnostic, impedance and snapshot data
 
-perceiveModular('','','','') % regular output (default)
+perceive('','','','') % regular output (default)
 
-perceiveModular('','','','', 'yes') %use gui for renaming and concatenation at end of perceive output
+perceive('','','','', 'yes') %use gui for renaming and concatenation at end of perceive output
 
-perceiveModular('','','','', '') % no gui (default)
+perceive('','','','', '') % no gui (default)
 
-perceiveModular('','','','', '', '') % localsettings (default)
+perceive('','','','', '', '') % localsettings (default)
 
-perceiveModular('','','','', '', 'default') % localsettings (default), refering to perceive_localsettings_default.json
+perceive('','','','', '', 'default') % localsettings (default), refering to perceive_localsettings_default.json
 
-perceiveModular('','','','', '', 'charite') % localsettings charite-specific, refering to perceive_localsettings_charite.json
+perceive('','','','', '', 'charite') % localsettings charite-specific, refering to perceive_localsettings_charite.json
 
-perceiveModular('','','','', '', 'mylab') % localsettings your lab-specific, refering to perceive_localsettings_mylab.json
+perceive('','','','', '', 'mylab') % localsettings your lab-specific, refering to perceive_localsettings_mylab.json
 ```
 ## applied example
 ```matlab
-perceiveModular('Report_Json_Session_Report_20200115T123657.json',25,'MedOff','yes', 'yes', 'perceive_localsettings_default.json') % combination of all above
+perceive('Report_Json_Session_Report_20200115T123657.json',25,'MedOff','yes', 'yes', 'perceive_localsettings_default.json') % combination of all above
 
 ```
 # OUTPUT
@@ -154,7 +154,7 @@ EI = Electrode Identifier (as of DataVersion 1.2)
 ## if GUi use is "yes"
 specify to use the GUI
 ```matlab
-perceiveModular('Report_Json_Session_Report_20200115T123657.json',9,'','', 'yes') %use gui for renaming and concatenation at end of perceive output
+perceive('Report_Json_Session_Report_20200115T123657.json',9,'','', 'yes') %use gui for renaming and concatenation at end of perceive output
 ```
 the GUI allows for
 * remove unwanted streams
@@ -204,7 +204,7 @@ perceive_stitch_interruption_together('sub-006_ses-Fu18mMedOff02_task-Rest_acq-S
 ```
 
 # artefact rejection
-Currently, there is in this perceiveModular version no automatic artefact rejection (e.g. ECG cleaning); we refer to our colleagues [DOI: 10.21203/rs.3.rs-8228751/v1](https://doi.org/10.21203/rs.3.rs-8228751/v1)
+Currently, there is in this perceive version no automatic artefact rejection (e.g. ECG cleaning); we refer to our colleagues [DOI: 10.21203/rs.3.rs-8228751/v1](https://doi.org/10.21203/rs.3.rs-8228751/v1)
 and the Stam et al. 2023 Clinical Neurophysiology [DOI: 10.1016/j.clinph.2022.11.011](https://doi.org/10.1016/j.clinph.2022.11.011)
 
 # package loss
