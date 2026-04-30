@@ -1,4 +1,4 @@
-function perceiveModular(files, sub, sesMedOffOn01, extended, gui, localsettings_name)
+function perceive(files, sub, sesMedOffOn01, extended, gui, localsettings_name)
 % RETUNE HACKATHON branch 06.2025
 % Toolbox by Wolf-Julian Neumann
 % Contributors Wolf-Julian Neumann, Tomas Sieger, Gerd Tinkhauser, Jennifer Behnke, Mansoureh Fahimi, Jonathan Kaplan, Jojo Vanhoecke (contact to Jojo Vanhoecke)
