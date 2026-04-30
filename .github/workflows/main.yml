@@ -20,6 +20,9 @@ on:
 permissions:
   contents: read
 
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
+
 concurrency:
   group: ci-${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
@@ -49,7 +52,7 @@ jobs:
       - name: Run tests
         uses: matlab-actions/run-command@v2
         with:
-          command: addpath("buildUtilities"),testToolbox('ReportSubdirectory',"${{ matrix.MATLABVersion }}",'Fast',true)
+          command: addpath("buildUtilities"),testToolbox('Fast',true)
           
       # Check for MATLAB code issues in the project.
       #- name: Check for MATLAB code issues
@@ -69,7 +72,7 @@ jobs:
         uses: codecov/codecov-action@v5
         if: always()
         with:
-          files: reports/${{ matrix.MATLABVersion }}/codecoverage.xml
+          files: reports/codecoverage.xml
           token: ${{ secrets.CODECOV_TOKEN }}
           slug: neuromodulation/perceive
           env_vars: ${{ matrix.MATLABVersion }}
@@ -79,7 +82,7 @@ jobs:
         uses: EnricoMi/publish-unit-test-result-action@v2
         if: always()
         with:
-          junit_files: "reports/${{ matrix.MATLABVersion }}/test-results.xml"
+          files: "reports/test-results.xml"
           
      # Save the contents of the reports directory as an artifact
       - name: Save Reports Directory
@@ -87,4 +90,4 @@ jobs:
         if: always()
         with:
           name: reports-${{ matrix.MATLABVersion }}
-          path: reports/${{ matrix.MATLABVersion }}
+          path: reports
