@@ -25,7 +25,17 @@ jobs:
       - name: Build standalone startup app
         uses: matlab-actions/run-command@v2
         with:
-          command: cd("toolbox"); diary("linux_build.log"); diary on; try, build_perceive_gui_startup_standalone; diary off; catch ME, disp(getReport(ME,"extended","hyperlinks","off")); fid=fopen("linux_build_error.txt","w"); fprintf(fid,"%s\n",getReport(ME,"extended","hyperlinks","off")); fclose(fid); diary off; exit(1); end
+          command: cd("toolbox"); ci_build_startup_standalone("linux")
+
+      - name: Upload MATLAB build logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: perceive_gui_startup-linux-build-logs
+          path: |
+            toolbox/linux_build.log
+            toolbox/linux_build_error.txt
+          if-no-files-found: ignore
 
       - name: Collect Linux binary artifact
         shell: bash
@@ -75,12 +85,3 @@ jobs:
           path: artifacts/linux/perceive_gui_startup
           if-no-files-found: error
 
-      - name: Upload MATLAB build logs
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: perceive_gui_startup-linux-build-logs
-          path: |
-            toolbox/linux_build.log
-            toolbox/linux_build_error.txt
-          if-no-files-found: ignore
