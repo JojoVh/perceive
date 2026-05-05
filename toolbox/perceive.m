@@ -56,6 +56,10 @@ perceive_init_logging_if_deployed();
 perceive_mcc_dependency_touch();
 
 if perceive_should_open_startup_gui(files, sub, sesMedOffOn01, extended, gui, localsettings_name, nargin)
+    if isdeployed
+        fprintf(1, 'Perceive: loading the startup interface (please wait)...\n');
+        drawnow update;
+    end
     perceive_launch_gui_startup();
     return;
 end
