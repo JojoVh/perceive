@@ -1,4 +1,4 @@
-name: Build macOS startup app
+name: Build macOS standalone apps
 
 on:
   workflow_dispatch:
@@ -10,8 +10,8 @@ env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
 
 jobs:
-  build-macos-app:
-    name: Build perceive_gui_startup.app (macOS)
+  build-macos-apps:
+    name: Build perceive + perceive_gui_startup (macOS)
     runs-on: macos-latest
     timeout-minutes: 60
 
@@ -22,19 +22,26 @@ jobs:
       - name: Set up MATLAB
         uses: matlab-actions/setup-matlab@v2
 
-      - name: Build standalone startup app
+      - name: Build startup standalone app
         uses: matlab-actions/run-command@v2
         with:
           command: cd("toolbox"); ci_build_startup_standalone("macos")
+
+      - name: Build main perceive standalone app
+        uses: matlab-actions/run-command@v2
+        with:
+          command: cd("toolbox"); ci_build_perceive_standalone("macos_perceive")
 
       - name: Upload MATLAB build logs
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: perceive_gui_startup-macos-build-logs
+          name: perceive-macos-build-logs
           path: |
             toolbox/macos_build.log
             toolbox/macos_build_error.txt
+            toolbox/macos_perceive_build.log
+            toolbox/macos_perceive_build_error.txt
           if-no-files-found: ignore
 
       - name: Collect macOS .app artifact
@@ -51,14 +58,14 @@ jobs:
           if not apps:
               raise SystemExit("No .app artifact found under toolbox after build.")
 
-          # Take the newest .app if there are multiple.
-          app = max(apps, key=lambda p: p.stat().st_mtime)
-          dest = out / app.name
-          if dest.exists():
-              shutil.rmtree(dest)
-          shutil.copytree(app, dest)
-
-          print(f"Collected app: {dest}")
+          for app in apps:
+              if app.name not in {"perceive.app", "perceive_gui_startup.app"}:
+                  continue
+              dest = out / app.name
+              if dest.exists():
+                  shutil.rmtree(dest)
+              shutil.copytree(app, dest)
+              print(f"Collected app: {dest}")
           PY
 
       - name: Place app into install folder
@@ -74,24 +81,24 @@ jobs:
           apps = sorted(src_root.glob("*.app"))
           if not apps:
               raise SystemExit("No .app found in artifacts/macos")
-          app = apps[0]
-          dest = install_dir / app.name
-          if dest.exists():
-              shutil.rmtree(dest)
-          shutil.copytree(app, dest)
-          print(f"Placed app into install folder: {dest}")
+          for app in apps:
+              dest = install_dir / app.name
+              if dest.exists():
+                  shutil.rmtree(dest)
+              shutil.copytree(app, dest)
+              print(f"Placed app into install folder: {dest}")
           PY
 
       - name: Commit updated install app to repository
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
-          commit_message: "chore: update macOS startup app bundle"
+          commit_message: "chore: update macOS standalone app bundles"
           file_pattern: install/*.app/**
 
       - name: Upload macOS app artifact
         uses: actions/upload-artifact@v4
         with:
-          name: perceive_gui_startup-macos-app
+          name: perceive-macos-apps
           path: artifacts/macos/
           if-no-files-found: error
 
