@@ -1,4 +1,4 @@
-name: Build macOS standalone apps
+name: Build macOS perceive.app
 
 on:
   workflow_dispatch:
@@ -8,7 +8,7 @@ permissions:
 
 jobs:
   build-macos-apps:
-    name: Build perceive + perceive_gui_startup (macOS)
+    name: Build perceive (macOS)
     runs-on: macos-latest
     timeout-minutes: 60
     env:
@@ -54,15 +54,10 @@ jobs:
                 warning('Could not run license test for Compiler: %s', ME.message);
             end
 
-      - name: Build startup standalone app
+      - name: Build perceive standalone app
         uses: matlab-actions/run-command@v3
         with:
-          command: cd("toolbox"); ci_build_startup_standalone("macos")
-
-      - name: Build main perceive standalone app
-        uses: matlab-actions/run-command@v3
-        with:
-          command: cd("toolbox"); ci_build_perceive_standalone("macos_perceive")
+          command: cd("toolbox"); ci_build_perceive_standalone("macos")
 
       - name: Upload MATLAB build logs
         if: always()
@@ -72,8 +67,6 @@ jobs:
           path: |
             toolbox/macos_build.log
             toolbox/macos_build_error.txt
-            toolbox/macos_perceive_build.log
-            toolbox/macos_perceive_build_error.txt
           if-no-files-found: ignore
 
       - name: Collect macOS .app artifact
@@ -91,13 +84,15 @@ jobs:
               raise SystemExit("No .app artifact found under toolbox after build.")
 
           for app in apps:
-              if app.name not in {"perceive.app", "perceive_gui_startup.app"}:
+              if app.name != "perceive.app":
                   continue
               dest = out / app.name
               if dest.exists():
                   shutil.rmtree(dest)
               shutil.copytree(app, dest)
               print(f"Collected app: {dest}")
+          if not any(p.name == "perceive.app" for p in out.glob("*.app")):
+              raise SystemExit("perceive.app not found after build.")
           PY
 
       - name: Place app into install folder
@@ -110,9 +105,9 @@ jobs:
           install_dir = pathlib.Path("install")
           install_dir.mkdir(parents=True, exist_ok=True)
 
-          apps = sorted(src_root.glob("*.app"))
+          apps = sorted(src_root.glob("perceive.app"))
           if not apps:
-              raise SystemExit("No .app found in artifacts/macos")
+              raise SystemExit("No perceive.app in artifacts/macos")
           for app in apps:
               dest = install_dir / app.name
               if dest.exists():
@@ -124,7 +119,7 @@ jobs:
       - name: Commit updated install app to repository
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
-          commit_message: "chore: update macOS standalone app bundles"
+          commit_message: "chore: update macOS perceive.app"
           file_pattern: install/*.app/**
 
       - name: Upload macOS app artifact
@@ -133,4 +128,3 @@ jobs:
           name: perceive-macos-apps
           path: artifacts/macos/
           if-no-files-found: error
-

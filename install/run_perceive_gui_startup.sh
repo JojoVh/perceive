@@ -40,11 +40,11 @@ log "Launcher started"
 
 if [[ "$OSTYPE" == darwin* ]]; then
     OS="macOS"
-    APP_PATH="$SCRIPT_DIR/perceive_gui_startup.app"
+    APP_PATH="$SCRIPT_DIR/perceive.app"
     echo "Detected OS: macOS"
 elif [[ "$OSTYPE" == linux-gnu* ]]; then
     OS="Linux"
-    APP_PATH="$SCRIPT_DIR/perceive_gui_startup"
+    APP_PATH="$SCRIPT_DIR/perceive"
     echo "Detected OS: Linux"
 else
     echo "Error: Unsupported OS. This script only works on macOS and Linux."
@@ -55,7 +55,7 @@ if [[ ! -e "$APP_PATH" ]]; then
     echo "[perceive] Platform app artifact is missing:"
     echo "  $APP_PATH"
     echo "This package may only contain the Windows .exe."
-    echo "Build and package perceive_gui_startup for $OS, then try again."
+    echo "Build and package perceive for $OS, then try again."
     exit 1
 fi
 

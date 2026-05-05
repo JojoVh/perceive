@@ -8,12 +8,12 @@ function prepare_windows_release_folder()
         mkdir(releaseDir);
     end
 
-    appExe = fullfile(toolboxDir, 'perceive_gui_startup.exe');
+    appExe = fullfile(toolboxDir, 'perceive.exe');
     if ~exist(appExe, 'file')
         warning('Compiled app not found yet: %s', appExe);
-        warning('Build perceive_gui_startup.exe first, then run this helper again.');
+        warning('Build perceive.exe first, then run this helper again.');
     else
-        copyfile(appExe, fullfile(releaseDir, 'perceive_gui_startup.exe'), 'f');
+        copyfile(appExe, fullfile(releaseDir, 'perceive.exe'), 'f');
     end
 
     installer = fullfile(toolboxDir, 'MCRInstaller.exe');
