@@ -6,9 +6,6 @@ on:
 permissions:
   contents: write
 
-env:
-  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
-
 jobs:
   build-macos-app:
     name: Build perceive_gui_startup.app (macOS)
@@ -25,7 +22,7 @@ jobs:
       - name: Build standalone startup app
         uses: matlab-actions/run-command@v2
         with:
-          command: cd("toolbox"); build_perceive_gui_startup_standalone
+          command: try, cd("toolbox"); build_perceive_gui_startup_standalone; catch ME, disp(getReport(ME,"extended","hyperlinks","off")); exit(1); end
 
       - name: Collect macOS .app artifact
         shell: bash

@@ -12,9 +12,8 @@ function build_perceive_gui_startup_standalone()
 
     compiler.build.standaloneApplication(appFile, ...
         'ExecutableName', 'perceive_gui_startup', ...
-        'OutputDir', fileparts(appFile), ...
-        'TreatInputsAsNumeric', false);
+        'OutputDir', fileparts(appFile));
 
     fprintf('\nBuild complete.\n');
-    fprintf('Distribute the generated app with MATLAB Runtime R2026a.\n');
+    fprintf('Distribute the generated app with MATLAB Runtime R2023a or newer.\n');
 end
