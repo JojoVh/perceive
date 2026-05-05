@@ -21,6 +21,29 @@ jobs:
 
       - name: Set up MATLAB
         uses: matlab-actions/setup-matlab@v2
+        with:
+          products: MATLAB_Compiler
+
+      - name: Preflight check MATLAB Compiler availability
+        uses: matlab-actions/run-command@v2
+        with:
+          command: |
+            fprintf('MATLAB version: %s\n', version);
+            v = ver('compiler');
+            if isempty(v)
+                error(['MATLAB Compiler is not installed on this runner. ', ...
+                    'Ensure setup-matlab installs MATLAB_Compiler and, if needed, set MLM_LICENSE_TOKEN.']);
+            end
+            fprintf('MATLAB Compiler installed: %s %s\n', v.Name, v.Version);
+            try
+                tf = license('test','Compiler');
+                fprintf('Compiler license test: %d\n', tf);
+                if ~tf
+                    warning('Compiler license unavailable. You may need MLM_LICENSE_TOKEN in repository secrets.');
+                end
+            catch ME
+                warning('Could not run license test for Compiler: %s', ME.message);
+            end
 
       - name: Build startup standalone app
         uses: matlab-actions/run-command@v2
