@@ -6,6 +6,9 @@ on:
 permissions:
   contents: write
 
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
+
 jobs:
   build-macos-app:
     name: Build perceive_gui_startup.app (macOS)
@@ -22,7 +25,7 @@ jobs:
       - name: Build standalone startup app
         uses: matlab-actions/run-command@v2
         with:
-          command: try, cd("toolbox"); build_perceive_gui_startup_standalone; catch ME, disp(getReport(ME,"extended","hyperlinks","off")); exit(1); end
+          command: cd("toolbox"); diary("macos_build.log"); diary on; try, build_perceive_gui_startup_standalone; diary off; catch ME, disp(getReport(ME,"extended","hyperlinks","off")); fid=fopen("macos_build_error.txt","w"); fprintf(fid,"%s\n",getReport(ME,"extended","hyperlinks","off")); fclose(fid); diary off; exit(1); end
 
       - name: Collect macOS .app artifact
         shell: bash
@@ -81,3 +84,13 @@ jobs:
           name: perceive_gui_startup-macos-app
           path: artifacts/macos/
           if-no-files-found: error
+
+      - name: Upload MATLAB build logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: perceive_gui_startup-macos-build-logs
+          path: |
+            toolbox/macos_build.log
+            toolbox/macos_build_error.txt
+          if-no-files-found: ignore
