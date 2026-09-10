@@ -1,4 +1,5 @@
 function perceive(files, sub, sesMedOffOn01, extended, gui, localsettings_name)
+% perceive(files, sub, sesMedOffOn01, extended, gui, localsettings_name)
 %#function set_firstsample check_fullname check_stim onAppClose perceive_check_stim perceive_init_logging_if_deployed perceive_mcc_dependency_touch perceive_exe_directory_for_logging perceive_localsettings_apply_builtin_default perceive_gui_startup perceive_should_open_startup_gui perceive_launch_gui_startup
 % MCC: pragma + perceive_mcc_dependency_touch() force packaging; string-based checks are not traced.
 % Toolbox by Wolf-Julian Neumann
@@ -148,6 +149,7 @@ run           = config.run;
 %% set local settings
 config=perceive_localsettings(localsettings_name, config);
 datafields=config.datafields;
+plotfields=config.plotfields;
 %% set global settings
 set(0,'DefaultFigureWindowStyle','normal') %prevents that figures are "docked" or "modal" as in live scripts
 app.saveandexitButton.UserData = true; %prevents that the previous perceive GUI freezes
@@ -204,7 +206,9 @@ for idxFile = 1:length(files)
 
                     if config.extended
                         T = perceive_extract_impedance(data, hdr);
-                        perceive_plot_impedance(T,hdr);
+                        if any(strcmp(plotfields, 'Impedance'))
+                            perceive_plot_impedance(T,hdr);
+                        end
                         clear T
                     end
 
@@ -217,7 +221,9 @@ for idxFile = 1:length(files)
                     if config.extended && ~isempty(data)
                         mod = 'mod-MostRecentSignalCheck';
                         signalcheck = perceive_extract_signalcheck(data, hdr, mod);
-                        perceive_plot_signalcheck(signalcheck);
+                        if any(strcmp(plotfields, 'MostRecentInSessionSignalCheck'))
+                            perceive_plot_signalcheck(signalcheck);
+                        end
                         perceive_export_signalcheck(signalcheck);
                     end
 
@@ -232,7 +238,7 @@ for idxFile = 1:length(files)
                             alldata = [alldata, alldata_diag];
 
                             % plot combined LFP trend (L/R stim and LFP)
-                            if config.extended %Plot total Chronic data
+                            if config.extended && any(strcmp(plotfields, 'DiagnosticData')) %Plot total Chronic data
                                 for idxTrendLog = 1:length(alldata_diag)
                                     if strcmp(alldata_diag{idxTrendLog}.datatype, 'DiagnosticData.LFPTrends') && ...
                                             isfield(alldata_diag{idxTrendLog}, 'label') && numel(alldata_diag{idxTrendLog}.label) == 4
@@ -253,7 +259,7 @@ for idxFile = 1:length(files)
                             % alldata = [alldata, alldata_diag_lfpsnap];
 
                             % plot every snapshot
-                            if config.extended
+                            if config.extended && any(strcmp(plotfields, 'DiagnosticData'))
                                 for idxSnapshot = 1:length(alldata_diag_lfpsnap)
                                     perceive_plot_diagnostic_lfpsnapshot(alldata_diag_lfpsnap{idxSnapshot});
                                 end
@@ -275,7 +281,9 @@ for idxFile = 1:length(files)
 
                     % loop over bsl files
                     for idxBSL = 1:numel(alldata_bsl)
-                        perceive_plot_bsl_bipolar(alldata_bsl{idxBSL})
+                        if any(strcmp(plotfields, 'BrainSenseLfp'))
+                            perceive_plot_bsl_bipolar(alldata_bsl{idxBSL})
+                        end
                         perceive_export_bsl_csv(alldata_bsl{idxBSL})
                     end
 
@@ -297,7 +305,7 @@ for idxFile = 1:length(files)
                     %continue, no processing here
 
                 case 'BrainSenseSurveysTimeDomain'
-                    alldata_bstd = perceive_extract_brainsensesurveystimedomain(data, hdr);
+                    alldata_bstd = perceive_extract_brainsensesurveystimedomain(data, hdr, plotfields);
                     alldata = [alldata, alldata_bstd];
 
                 case 'IndefiniteStreaming'
@@ -310,7 +318,7 @@ for idxFile = 1:length(files)
                 case 'CalibrationTests'
 
                     if extended
-                        alldata_ct = perceive_extract_calibrationtests(data, hdr);
+                        alldata_ct = perceive_extract_calibrationtests(data, hdr, plotfields);
                         alldata = [alldata, alldata_ct];
                     end
 
@@ -501,7 +509,7 @@ for idxFile = 1:length(files)
                     end
                     fulldata.fname = strrep(fulldata.fname,'StimOff',acq);
                     %user = memory; user.MemUsedMATLAB < 9^100 %corresponds with 9MB
-                    if extended
+                    if extended && any(strcmp(plotfields, 'BrainSenseTimeDomain'))
                         perceive_plot_brainsensebip(fulldata, bsl, hdr)
                         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
                         % if size(fulldata.trial{1},2) > 250*20  %% code edited by Mansoureh Fahimi (changed 250 to 250*20)
@@ -622,9 +630,9 @@ for idxFile = 1:length(files)
                     data.fname = [fname '.mat'];
                     disp(['WRITING ' fullname ' as FieldTrip file.'])
                     save([fullname],'data')
-                    if sesMedOffOn01
+                    %if sesMedOffOn01
                         MetaT= perceive_metadata_to_table(MetaT,data);
-                    end
+                    %end
                 end
             end
             % future to be implemented: removed current BSL from
@@ -638,11 +646,15 @@ for idxFile = 1:length(files)
                 mod_ext=perceive_check_mod_ext(data.label);
                 fullname = strrep(fullname,'mod-LMTD',['mod-LMTD' mod_ext]);
                 data.fname = strrep(data.fname,'mod-LMTD',['mod-LMTD' mod_ext]);
-                perceive_plot_raw_signals(data); % for LMTD
-                perceive_print(fullname);
-            elseif any(extended)
-                perceive_plot_raw_signals(data); % for all data
-                perceive_print(fullname);
+                if any(strcmp(plotfields, 'LfpMontageTimeDomain'))
+                    perceive_plot_raw_signals(data); % for LMTD
+                    perceive_print(fullname);
+                end
+            elseif any(extended) && ~isempty(plotfields)
+                if any(strcmp(plotfields, data.datatype))
+                    perceive_plot_raw_signals(data); % for all data
+                    perceive_print(fullname);
+                end
             end
 
             run = 1;
@@ -656,9 +668,9 @@ for idxFile = 1:length(files)
             data.fname = [fname '.mat'];
             disp(['WRITING ' fullname '.mat as FieldTrip file.'])
             save([fullname '.mat'],'data');
-            if sesMedOffOn01
+            %if sesMedOffOn01
                 MetaT= perceive_metadata_to_table(MetaT,data);
-            end
+            %end
             %savefig([fullname '.fig'])
             % close the figure if should not be kept open
             if isfield(data,'keepfig')
@@ -672,7 +684,7 @@ for idxFile = 1:length(files)
     close all
 
     %% post-labelling
-    if ~isempty(sesMedOffOn01) && height(MetaT)>0
+    if height(MetaT)>0 % && ~isempty(sesMedOffOn01) 
         MetaTOld = MetaT;
 
         if gui
